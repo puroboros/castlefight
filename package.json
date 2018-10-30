@@ -1,0 +1,38 @@
+{
+  "name": "castlefight",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "dev": "webpack --mode development && webpack-dev-server --mode development",
+    "build": "webpack --mode production && webpack-dev-server --mode production",
+    "test": "ts-node node_modules/jasmine/bin/jasmine"
+  },
+  "private": true,
+  "dependencies": {
+    "@types/three": "^0.93.5",
+    "rxjs": "^6.3.3",
+    "three": "^0.97.0",
+    "tslint": "^5.11.0",
+    "typescript": "^3.1.4"
+  },
+  "devDependencies": {
+    "@types/jasmine": "^2.8.9",
+    "@types/node": "^10.12.1",
+    "awesome-typescript-loader": "^5.2.1",
+    "browser-sync": "^2.26.3",
+    "browser-sync-webpack-plugin": "^2.2.2",
+    "css-loader": "^1.0.1",
+    "expose-loader": "^0.7.5",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "file-loader": "^2.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "jasmine": "^3.3.0",
+    "progress-bar-webpack-plugin": "^1.11.0",
+    "style-loader": "^0.23.1",
+    "ts-loader": "^5.2.2",
+    "ts-node": "^7.0.1",
+    "webpack": "^4.23.1",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.10"
+  }
+}
