@@ -9,8 +9,10 @@
   },
   "private": true,
   "dependencies": {
+    "@types/socket.io-client": "^1.4.32",
     "@types/three": "^0.93.5",
     "rxjs": "^6.3.3",
+    "socket.io-client": "^2.1.1",
     "three": "^0.97.0",
     "tslint": "^5.11.0",
     "typescript": "^3.1.4"
