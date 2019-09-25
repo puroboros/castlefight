@@ -3,7 +3,11 @@ import './style.css';
 // three.js
 import * as THREE from 'three';
 
-import './connection';
+import {SocketConnector} from './connection';
+
+const socketConnector = new SocketConnector();
+
+socketConnector.send('hola');
 
 // create the scene
 const scene = new THREE.Scene();
