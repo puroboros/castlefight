@@ -1,19 +1,17 @@
-// add styles
 import './style.css';
-// three.js
 import * as THREE from 'three';
-
 import './connection';
-require ('./assets/e.png');
+import { SpriteAnimated } from './textures/sprite-animated';
+require ('./assets/tio.jpg');
+require ('./assets/arceus.jpg');
+
 // create the scene
 const scene = new THREE.Scene();
 
 // create the camera
 const camera = new THREE.PerspectiveCamera(105, 1, 0.1, 1000);
-//const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-
-const renderer = new THREE.WebGLRenderer();
+let renderer = new THREE.WebGLRenderer();
 
 // set size
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -45,26 +43,22 @@ const material = new THREE.MeshBasicMaterial({
 });
 
 //MAXGUARREANDING
-var spriteMap = new THREE.TextureLoader().load( "./assets/g.png" );
-var spriteMaterial = new THREE.SpriteMaterial( { map: spriteMap, color: 0xffffff } );
-var sprite = new THREE.Sprite( spriteMaterial);
-var qwe = new THREE.SpriteMaterial( );
-var asd = new THREE.Sprite(qwe);
-asd.scale.set(7, 10, 1);
-scene.add(asd);
-sprite.scale.set(50, 10, 1);
-//scene.add( sprite );
+const spriteAnimated = new SpriteAnimated();
+const movingImage = spriteAnimated.loadImage('./assets/tio.jpg', 1, 1, 10, 1, 100, 10);
+spriteAnimated.setScale(10, 10, 1);
+spriteAnimated.setTranslation(-10,-10,0);
+scene.add( movingImage );
 
-/*var runnerMaterial = new THREE.MeshBasicMaterial( { map: spriteMap, side:THREE.DoubleSide } );
-var runnerGeometry = new THREE.PlaneGeometry(50, 10, 1, 1);
-var runner = new THREE.Mesh(runnerGeometry, runnerMaterial);
-runner.position.set(0,0,0);
-scene.add(runner);*/
+const secondSprite = new SpriteAnimated();
+const secondMovingImage = secondSprite.loadImage('./assets/arceus.jpg', 1, 1, 4, 4, 100, 10);
+secondSprite.setScale(10, 10, 1);
+scene.add( secondMovingImage );
 
-sprite.position.y = 5;
-sprite.position.x = 0;
-let contador = 0;
-
+const thirdSprite = new SpriteAnimated();
+const thirdMovingImage = thirdSprite.loadImage('./assets/tio.jpg', 1, 1, 10, 1, 100, 10);
+thirdSprite.setScale(10, 10, 1);
+thirdSprite.setTranslation(10,10,0);
+scene.add( thirdMovingImage );
 
 
 // create a box and add it to the scene
@@ -87,17 +81,7 @@ function animate(): void {
 }
 
 function render(): void {
-	//const timer = 0.002 * Date.now();
-	//box.position.y = 1;
-	//box.position.x = (box.position.x + 0.05)%10 ;
-	//box.rotation.x += 0.1;
-	//sprite.position.x = (sprite.position.x + 0.01)%10;
-	//contador = contador + 1;
-	//spriteMap.offset.x = ((contador%10)/100);
-	spriteMap.offset.x = (0.0);
-	spriteMap.offset.y = 0;
 	renderer.render(scene, camera);
 }
 
 animate();
-
