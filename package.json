@@ -9,17 +9,20 @@
   },
   "private": true,
   "dependencies": {
-    "@types/socket.io-client": "^1.4.32",
+    "@stomp/rx-stomp": "^0.3.3",
+    "@types/sockjs-client": "^1.1.1",
+    "@types/stompjs": "^2.3.4",
     "@types/three": "^0.93.5",
+    "net": "^1.0.2",
     "rxjs": "^6.3.3",
-    "socket.io-client": "^2.1.1",
-    "three": "^0.97.0",
-    "tslint": "^5.11.0",
-    "typescript": "^3.1.4"
+    "sockjs": "^0.3.19",
+    "stompjs": "^2.3.3",
+    "three": "^0.97.0"
   },
   "devDependencies": {
     "@types/jasmine": "^2.8.9",
     "@types/node": "^10.12.1",
+    "@types/sockjs": "^0.3.31",
     "awesome-typescript-loader": "^5.2.1",
     "browser-sync": "^2.26.3",
     "browser-sync-webpack-plugin": "^2.2.2",
@@ -31,8 +34,10 @@
     "jasmine": "^3.3.0",
     "progress-bar-webpack-plugin": "^1.11.0",
     "style-loader": "^0.23.1",
+    "tslint": "^5.11.0",
     "ts-loader": "^5.2.2",
     "ts-node": "^7.0.1",
+    "typescript": "^3.1.4",
     "webpack": "^4.23.1",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.10"
