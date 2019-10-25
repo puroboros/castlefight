@@ -4,7 +4,6 @@ export class SpriteAnimated {
     private endFrame: number;
     private framesX: number;
     private framesY: number;
-    private numRow: number = 0;
     private frameWidth: number;
     private frameHeight: number;
     private frameDelay: number;
@@ -64,8 +63,10 @@ export class SpriteAnimated {
             this.count = 0;
         };
 
-        this.texture.offset.x = this.count/this.framesX;
-        this.texture.offset.y = this.numRow/this.framesY;
+        this.x = (this.count % this.framesX) * this.frameWidth/10;
+        this.y = ((this.count / this.framesX) | 0) * this.frameHeight/10;
+        this.texture.offset.x = this.x;
+        this.texture.offset.y = this.y;
         console.log('count: ' + this.count);
         console.log('x: ' + this.x);
         console.log('y: ' + this.y);
@@ -77,22 +78,5 @@ export class SpriteAnimated {
         
 
         // this.canvasTexture.needsUpdate = true;
-    }
-
-    setNumRow(numRow: number){
-        if(numRow > this.framesY || numRow < 0){
-            this.numRow = 0;
-        }
-        else{
-            this.numRow = numRow;
-        }
-    }
-
-    setFramesX(framesX: number){
-        this.framesX = framesX;
-    }
-
-    setEndFrame(endFrame: number){
-        this.endFrame = endFrame;
     }
 }

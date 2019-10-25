@@ -2,8 +2,8 @@ import './style.css';
 import * as THREE from 'three';
 import './connection';
 import { SpriteAnimated } from './textures/sprite-animated';
-require ('./assets/q.jpg');
-require ('./assets/w.png');
+require ('./assets/tio.jpg');
+require ('./assets/arceus.jpg');
 
 // create the scene
 const scene = new THREE.Scene();
@@ -44,38 +44,34 @@ const material = new THREE.MeshBasicMaterial({
 
 //MAXGUARREANDING
 const spriteAnimated = new SpriteAnimated();
-const movingImage = spriteAnimated.loadImage('./assets/try4.png', 1, 1, 8, 15, 100, 8);
+const movingImage = spriteAnimated.loadImage('./assets/tio.jpg', 1, 1, 10, 1, 100, 10);
 spriteAnimated.setScale(10, 10, 1);
-spriteAnimated.setTranslation(-50,-10,0);
-spriteAnimated.setNumRow(6);
+spriteAnimated.setTranslation(-10,-10,0);
 scene.add( movingImage );
 
 const secondSprite = new SpriteAnimated();
-const secondMovingImage = secondSprite.loadImage('./assets/q.jpg', 1, 1, 4, 4, 100, 10);
+const secondMovingImage = secondSprite.loadImage('./assets/arceus.jpg', 1, 1, 4, 4, 100, 10);
 secondSprite.setScale(10, 10, 1);
-//scene.add( secondMovingImage );
+scene.add( secondMovingImage );
 
 const thirdSprite = new SpriteAnimated();
-const thirdMovingImage = thirdSprite.loadImage('./assets/v.png', 1, 1, 10, 8, 100, 10);
-thirdSprite.setEndFrame(11);
-thirdSprite.setNumRow(1);
-thirdSprite.setFramesX(11);
+const thirdMovingImage = thirdSprite.loadImage('./assets/tio.jpg', 1, 1, 10, 1, 100, 10);
 thirdSprite.setScale(10, 10, 1);
-thirdSprite.setTranslation(50,-10,0);
+thirdSprite.setTranslation(10,10,0);
 scene.add( thirdMovingImage );
 
 
 // create a box and add it to the scene
 const box = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
 
-//scene.add(box);
+scene.add(box);
 
 box.position.x = 0.5;
 box.rotation.y = 0.5;
 
 camera.position.x = 0;
 camera.position.y = 0;
-camera.position.z = 50;
+camera.position.z = 20;
 
 camera.lookAt(scene.position);
 
@@ -85,8 +81,6 @@ function animate(): void {
 }
 
 function render(): void {
-	//spriteAnimated.setTranslation(-50,-10,0);
-	//thirdSprite.setTranslation(50,-10,0);
 	renderer.render(scene, camera);
 }
 
