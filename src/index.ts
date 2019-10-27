@@ -5,6 +5,16 @@ import { SpriteAnimated } from './textures/sprite-animated';
 require ('./assets/q.jpg');
 require ('./assets/w.png');
 
+window.onload = () =>{
+	document.onkeydown = keyListen;
+	document.getElementById('leftcam').onclick = moveCamToLeft;
+	document.getElementById('rightcam').onclick = moveCamToRight;
+	document.getElementById('zoomout').onclick = moveCamToCloser;
+	document.getElementById('zoomin').onclick = moveCamToFarther;
+	document.getElementById('upcam').onclick = moveCamToUp;
+	document.getElementById('downcam').onclick = moveCamToDown;
+}
+
 // create the scene
 const scene = new THREE.Scene();
 
@@ -44,16 +54,16 @@ const material = new THREE.MeshBasicMaterial({
 
 //MAXGUARREANDING
 const spriteAnimated = new SpriteAnimated();
-const movingImage = spriteAnimated.loadImage('./assets/try4.png', 1, 1, 8, 15, 100, 8);
+const movingImage = spriteAnimated.loadImage('./assets/qw.png', 1, 1, 18, 13, 100, 18);
 spriteAnimated.setScale(10, 10, 1);
 spriteAnimated.setTranslation(-50,-10,0);
 spriteAnimated.setNumRow(6);
 scene.add( movingImage );
 
 const secondSprite = new SpriteAnimated();
-const secondMovingImage = secondSprite.loadImage('./assets/q.jpg', 1, 1, 4, 4, 100, 10);
+const secondMovingImage = secondSprite.loadImage('./assets/qw.jpg', 1, 1, 4, 4, 100, 10);
 secondSprite.setScale(10, 10, 1);
-//scene.add( secondMovingImage );
+scene.add( secondMovingImage );
 
 const thirdSprite = new SpriteAnimated();
 const thirdMovingImage = thirdSprite.loadImage('./assets/v.png', 1, 1, 10, 8, 100, 10);
@@ -90,4 +100,50 @@ function render(): void {
 	renderer.render(scene, camera);
 }
 
+function moveCamToLeft(){
+	moveCam(-1,0,0);
+}
+
+function moveCamToRight(){
+	moveCam(1,0,0);
+}
+
+function moveCamToUp(){
+	moveCam(0,1,0);
+}
+
+function moveCamToDown(){
+	moveCam(0,-1,0);
+}
+
+function moveCamToCloser(){
+	moveCam(0,0,-1);
+}
+
+function moveCamToFarther(){
+	moveCam(0,0,1);
+}
+
+function moveCam(tweakX: number, tweakY: number, tweakZ: number){
+	camera.position.x += tweakX;
+	camera.position.y += tweakY;
+	camera.position.z += tweakZ;
+}
+
+function keyListen(e: KeyboardEvent){
+	//e = e || window.event;
+
+    if (e.keyCode === 38) {
+        moveCamToUp();
+    }
+    else if (e.keyCode === 40) {
+        moveCamToDown();
+    }
+    else if (e.keyCode === 37) {
+       moveCamToLeft();
+    }
+    else if (e.keyCode === 39) {
+       moveCamToRight();
+    }
+}
 animate();
