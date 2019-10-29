@@ -1,5 +1,5 @@
 /* Configure HTMLWebpack plugin */
-const HtmlWebpackPlugin = require('html-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HTMLWebpackPluginConfig = new HtmlWebpackPlugin({
     template: __dirname + '/src/index.html',
     filename: 'index.html',
@@ -15,6 +15,11 @@ const BrowserSyncPluginConfig = new BrowserSyncPlugin({
 }, config = {
     reload: false
 })
+
+
+/*plugins random*/
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 
 /* Configure ProgressBar */
 const ProgressBarPlugin = require('progress-bar-webpack-plugin')
@@ -49,6 +54,11 @@ module.exports = {
                     {loader: 'css-loader'}
                 ]
             }, {
+                test: /\.(png|svg|jpg|gif)$/i,
+                use: [
+                    'file-loader']
+            },
+            {
                 test: /\.css$/,
                 exclude: /[\/\\](node_modules|bower_components|public)[\/\\]/,
                 use: [
@@ -70,6 +80,7 @@ module.exports = {
             }
         ]
     },
-    resolve: { extensions: [".web.ts", ".web.js", ".ts", ".js"] },
-    plugins: [HTMLWebpackPluginConfig, BrowserSyncPluginConfig, ProgressBarPluginConfig]
+    resolve: { extensions: [".web.ts", ".web.js", ".ts", ".js", ".png"] },
+    plugins: [HTMLWebpackPluginConfig, BrowserSyncPluginConfig, ProgressBarPluginConfig,
+    new CopyWebpackPlugin([{from:'src/assets',to:'assets'}])]
 }
