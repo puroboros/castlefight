@@ -2,6 +2,7 @@ import './style.css';
 import * as THREE from 'three';
 import './connection';
 import { SpriteAnimated } from './textures/sprite-animated';
+import {SocketConnector} from './connection';
 require ('./assets/q.jpg');
 require ('./assets/w.png');
 
@@ -14,6 +15,12 @@ window.onload = () =>{
 	document.getElementById('upcam').onclick = moveCamToUp;
 	document.getElementById('downcam').onclick = moveCamToDown;
 }
+
+
+
+const socketConnector = new SocketConnector();
+
+socketConnector.send('hola');
 
 // create the scene
 const scene = new THREE.Scene();
