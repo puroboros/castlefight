@@ -3,10 +3,13 @@ import * as THREE from 'three';
 import './connection';
 import { SpriteAnimated } from './textures/sprite-animated';
 import {SocketConnector} from './connection';
+
 require ('./assets/q.jpg');
 require ('./assets/w.png');
 
 window.onload = () =>{
+	document.onmouseout = mouseCachePoistionCameraListen
+	document.onmousemove = mouseMoveCameraListen;
 	document.onkeydown = keyListen;
 	document.getElementById('leftcam').onclick = moveCamToLeft;
 	document.getElementById('rightcam').onclick = moveCamToRight;
@@ -14,9 +17,12 @@ window.onload = () =>{
 	document.getElementById('zoomin').onclick = moveCamToFarther;
 	document.getElementById('upcam').onclick = moveCamToUp;
 	document.getElementById('downcam').onclick = moveCamToDown;
+	document.getElementById('centercam').onclick = centerCamera;
+	document.getElementById('fullscreen').onclick = fullScreen;
+	document.getElementById('closefullscreen').onclick = closeFullScreen;
 }
 
-
+const elem = document.documentElement;
 
 const socketConnector = new SocketConnector();
 
@@ -27,6 +33,14 @@ const scene = new THREE.Scene();
 
 // create the camera
 const camera = new THREE.PerspectiveCamera(105, 1, 0.1, 1000);
+let constantMoveLeftCamera = false;
+let constantMoveRightCamera = false;
+let constantMoveUpCamera = false;
+let constantMoveDownCamera = false;
+let maxCoordCameraLeft = -100;
+let maxCoordCameraRight = 100;
+let maxCoordCameraUp = 40;
+let maxCoordCameraDown = -40;
 
 let renderer = new THREE.WebGLRenderer();
 
@@ -74,6 +88,8 @@ scene.add( secondMovingImage );
 
 const thirdSprite = new SpriteAnimated();
 const thirdMovingImage = thirdSprite.loadImage('./assets/v.png', 1, 1, 10, 8, 100, 10);
+thirdSprite.flipSpriteY();
+thirdSprite.flipSpriteRads(1);
 thirdSprite.setEndFrame(11);
 thirdSprite.setNumRow(1);
 thirdSprite.setFramesX(11);
@@ -104,6 +120,18 @@ function animate(): void {
 function render(): void {
 	//spriteAnimated.setTranslation(-50,-10,0);
 	//thirdSprite.setTranslation(50,-10,0);
+	if(constantMoveLeftCamera){
+		camera.position.x = Math.max(camera.position.x-1,maxCoordCameraLeft);
+	}
+	if(constantMoveRightCamera){
+		camera.position.x = Math.min(camera.position.x+1,maxCoordCameraRight);
+	}
+	if(constantMoveUpCamera){
+		camera.position.y = Math.min(camera.position.y+1,maxCoordCameraUp);
+	}
+	if(constantMoveDownCamera){
+		camera.position.y = Math.max(camera.position.y-1,maxCoordCameraDown);
+	}
 	renderer.render(scene, camera);
 }
 
@@ -152,5 +180,74 @@ function keyListen(e: KeyboardEvent){
     else if (e.keyCode === 39) {
        moveCamToRight();
     }
+}
+
+function mouseMoveCameraListen(e: MouseEvent){
+	if(e.x<1){
+		constantMoveLeftCamera = true;
+	}
+	else{
+		constantMoveLeftCamera = false;
+	}
+	if(e.y<1){
+		constantMoveUpCamera = true;
+	}
+	else{
+		constantMoveUpCamera = false;
+	}
+	if(e.x>screen.width-10){
+		constantMoveRightCamera = true;
+	}
+	else{
+		constantMoveRightCamera = false;
+	}
+	if(e.y>window.innerHeight-10){
+		constantMoveDownCamera = true;
+	}
+	else{
+		constantMoveDownCamera = false;
+	}
+}
+
+function mouseCachePoistionCameraListen(e: MouseEvent){
+	if(e.x<1){
+		constantMoveLeftCamera = true;
+	}
+	else{
+		constantMoveLeftCamera = false;
+	}
+	if(e.y<1){
+		constantMoveUpCamera = true;
+	}
+	else{
+		constantMoveUpCamera = false;
+	}
+	if(e.x>screen.width-10){
+		constantMoveRightCamera = true;
+	}
+	else{
+		constantMoveRightCamera = false;
+	}
+	if(e.y>window.innerHeight-10){
+		constantMoveDownCamera = true;
+	}
+	else{
+		constantMoveDownCamera = false;
+	}
+}
+
+function centerCamera(){
+	camera.position.x = 0;
+	camera.position.y = 0;
+	camera.position.z = 50;
+}
+
+function fullScreen(){
+	
+	document.documentElement.requestFullscreen();
+}
+
+function closeFullScreen(){
+	document.exitFullscreen();
 }
 animate();
