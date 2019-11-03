@@ -38,8 +38,8 @@ export class SpriteAnimated {
         this.texture = new THREE.TextureLoader().load(image);
         this.texture.wrapS = THREE.RepeatWrapping;
         this.texture.wrapT = THREE.RepeatWrapping;
+        
         this.texture.repeat.set(1/framesX, 1/framesY);
-
         this.material = new THREE.SpriteMaterial({ map: this.texture, color: 0xffffff });
         this.sprite = new THREE.Sprite(this.material);
         this.timer = setInterval(this.nextFrame.bind(this), this.frameDelay);
@@ -63,7 +63,7 @@ export class SpriteAnimated {
         if (this.count >= this.endFrame) {
             this.count = 0;
         };
-
+        
         this.texture.offset.x = this.count/this.framesX;
         this.texture.offset.y = this.numRow/this.framesY;
         console.log('count: ' + this.count);
@@ -94,5 +94,13 @@ export class SpriteAnimated {
 
     setEndFrame(endFrame: number){
         this.endFrame = endFrame;
+    }
+
+    flipSpriteRads(rads: number){
+        this.texture.rotation = Math.PI*rads;
+    }
+
+    flipSpriteY(){
+        this.texture.flipY = !this.texture.flipY;
     }
 }
