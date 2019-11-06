@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { LinearMipMapLinearFilter, LinearMipMapNearestFilter, LinearFilter, NearestFilter, NearestMipMapNearestFilter, NearestMipMapLinearFilter } from 'three';
 
 export class SpriteAnimated {
     private endFrame: number;
@@ -18,7 +19,7 @@ export class SpriteAnimated {
     constructor() {
     }
 
-    loadImage(image: string, frameHeight: number, frameWidth: number, framesX: number, framesY: number, frameDelay: number, endFrame: number) {
+    loadImage(image: string, frameHeight: number, frameWidth: number, framesX: number, framesY: number, frameDelay: number, endFrame: number, anisotropy: number) {
         if (this.timer) {
             this.material.dispose();
             this.texture.dispose();
@@ -32,13 +33,13 @@ export class SpriteAnimated {
         this.x = 0;
         this.y = 0;
         this.count = 0;
-        /*this.canvasTexture = new THREE.CanvasTexture(this.canvas);
-        this.canvas.width = this.frameWidth = img.width / this.framesX;
-        this.canvas.height = this.frameHeight = img.height / this.framesY;*/
         this.texture = new THREE.TextureLoader().load(image);
         this.texture.wrapS = THREE.RepeatWrapping;
         this.texture.wrapT = THREE.RepeatWrapping;
-        
+        this.texture.minFilter = NearestMipMapNearestFilter;
+        this.texture.magFilter = NearestFilter;
+        this.texture.anisotropy = anisotropy;
+        //this.texture.magFilter = LinearMipMapNearestFilter;
         this.texture.repeat.set(1/framesX, 1/framesY);
         this.material = new THREE.SpriteMaterial({ map: this.texture, color: 0xffffff });
         this.sprite = new THREE.Sprite(this.material);
@@ -57,7 +58,6 @@ export class SpriteAnimated {
     }
 
     private nextFrame() {
-        console.log('intervallllll');
         this.count++;
 
         if (this.count >= this.endFrame) {
@@ -66,17 +66,6 @@ export class SpriteAnimated {
         
         this.texture.offset.x = this.count/this.framesX;
         this.texture.offset.y = this.numRow/this.framesY;
-        console.log('count: ' + this.count);
-        console.log('x: ' + this.x);
-        console.log('y: ' + this.y);
-        console.log('framesX: ' + this.framesX);
-        console.log('frameHeight: ' + this.frameHeight);
-        console.log('frameWidth: ' + this.frameWidth);
-        // this.context.clearRect(0, 0, this.frameWidth, this.frameHeight);
-        // this.context.drawImage(this.img, this.x, this.y, this.frameWidth, this.frameHeight, 0, 0, this.frameWidth, this.frameHeight);
-        
-
-        // this.canvasTexture.needsUpdate = true;
     }
 
     setNumRow(numRow: number){

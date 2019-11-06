@@ -8,9 +8,11 @@ require ('./assets/q.jpg');
 require ('./assets/w.png');
 
 window.onload = () =>{
+	
 	document.onmouseout = mouseCachePoistionCameraListen
 	document.onmousemove = mouseMoveCameraListen;
 	document.onkeydown = keyListen;
+	document.onwheel = scrollDirection;
 	document.getElementById('leftcam').onclick = moveCamToLeft;
 	document.getElementById('rightcam').onclick = moveCamToRight;
 	document.getElementById('zoomout').onclick = moveCamToCloser;
@@ -20,6 +22,7 @@ window.onload = () =>{
 	document.getElementById('centercam').onclick = centerCamera;
 	document.getElementById('fullscreen').onclick = fullScreen;
 	document.getElementById('closefullscreen').onclick = closeFullScreen;
+	
 }
 
 const elem = document.documentElement;
@@ -42,18 +45,22 @@ let maxCoordCameraRight = 100;
 let maxCoordCameraUp = 40;
 let maxCoordCameraDown = -40;
 
+
 let renderer = new THREE.WebGLRenderer();
 
+
+
 // set size
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth, window.innerHeight-4);
+
+
 
 // add canvas to dom
 document.body.appendChild(renderer.domElement);
 
-// add axis to the scene
-const axis = new THREE.AxesHelper(10);
 
 //scene.add(axis);
+const axis = new THREE.AxesHelper(10);
 
 // add lights
 const light = new THREE.DirectionalLight(0xffffff, 1.0);
@@ -75,19 +82,23 @@ const material = new THREE.MeshBasicMaterial({
 
 //MAXGUARREANDING
 const spriteAnimated = new SpriteAnimated();
-const movingImage = spriteAnimated.loadImage('./assets/qw.png', 1, 1, 18, 13, 100, 18);
+const movingImage = spriteAnimated.loadImage('./assets/qw.png', 1, 1, 18, 13, 100, 18, renderer.getMaxAnisotropy());
 spriteAnimated.setScale(10, 10, 1);
 spriteAnimated.setTranslation(-50,-10,0);
 spriteAnimated.setNumRow(6);
 scene.add( movingImage );
 
-const secondSprite = new SpriteAnimated();
-const secondMovingImage = secondSprite.loadImage('./assets/qw.jpg', 1, 1, 4, 4, 100, 10);
-secondSprite.setScale(10, 10, 1);
-scene.add( secondMovingImage );
+
+var map = new THREE.TextureLoader().load( "q3.png" );
+var material2 = new THREE.SpriteMaterial( { map: map, color: 0xffffff } );
+var sprite = new THREE.Sprite( material2 );
+scene.add( sprite );
+sprite.scale.set(1,1,1);
+
+
 
 const thirdSprite = new SpriteAnimated();
-const thirdMovingImage = thirdSprite.loadImage('./assets/v.png', 1, 1, 10, 8, 100, 10);
+const thirdMovingImage = thirdSprite.loadImage('./assets/v.png', 1, 1, 10, 8, 100, 10, renderer.getMaxAnisotropy());
 thirdSprite.flipSpriteY();
 thirdSprite.flipSpriteRads(1);
 thirdSprite.setEndFrame(11);
@@ -118,8 +129,6 @@ function animate(): void {
 }
 
 function render(): void {
-	//spriteAnimated.setTranslation(-50,-10,0);
-	//thirdSprite.setTranslation(50,-10,0);
 	if(constantMoveLeftCamera){
 		camera.position.x = Math.max(camera.position.x-1,maxCoordCameraLeft);
 	}
@@ -166,8 +175,6 @@ function moveCam(tweakX: number, tweakY: number, tweakZ: number){
 }
 
 function keyListen(e: KeyboardEvent){
-	//e = e || window.event;
-
     if (e.keyCode === 38) {
         moveCamToUp();
     }
@@ -179,7 +186,13 @@ function keyListen(e: KeyboardEvent){
     }
     else if (e.keyCode === 39) {
        moveCamToRight();
-    }
+	}
+	else if (e.keyCode === 107) {
+		moveCamToCloser();
+	}
+	else if (e.keyCode === 109) {
+		moveCamToFarther();
+	}
 }
 
 function mouseMoveCameraListen(e: MouseEvent){
@@ -243,11 +256,22 @@ function centerCamera(){
 }
 
 function fullScreen(){
-	
+	renderer.setSize(screen.width,screen.height-4);
 	document.documentElement.requestFullscreen();
 }
 
 function closeFullScreen(){
 	document.exitFullscreen();
+	setTimeout(()=>{ renderer.setSize(window.innerWidth, window.innerHeight-4) }, 100);
+	
+}
+
+function scrollDirection(e: WheelEvent){
+	if(e.deltaY<0 && camera.position.z >1){
+		moveCamToCloser();
+	}
+	else if(e.deltaY>0 && camera.position.z < 200){
+		moveCamToFarther();
+	}
 }
 animate();

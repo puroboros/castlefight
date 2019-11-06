@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "webpack --mode development && webpack-dev-server --mode development",
+    "dev": "webpack --mode development && webpack-dev-server --host 0.0.0.0 --mode development",
     "build": "webpack --mode production && webpack-dev-server --mode production",
     "test": "ts-node node_modules/jasmine/bin/jasmine"
   },
