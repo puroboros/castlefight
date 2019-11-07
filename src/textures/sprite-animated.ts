@@ -70,8 +70,8 @@ export class SpriteAnimated {
     }
 
     setNumRow(numRow: number){
-        if(numRow > this.framesY || numRow < 0){
-            this.numRow = 0;
+        if(numRow >= this.framesY+this.initialFrame || numRow < 0){
+            this.numRow = this.initialFrame;
         }
         else{
             this.numRow = numRow;
@@ -93,5 +93,14 @@ export class SpriteAnimated {
     flipSpriteY(){
         this.initialFrame = (this.initialFrame + 1) % 2;
         this.texture.flipY = !this.texture.flipY;
+    }
+    getSpriteMaterial(){
+        return this.material;
+    }
+    getSprite(){
+        return this.sprite;
+    }
+    getNumRow(){
+        return this.numRow;
     }
 }

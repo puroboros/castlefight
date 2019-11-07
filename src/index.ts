@@ -3,7 +3,8 @@ import * as THREE from 'three';
 import './connection';
 import { SpriteAnimated } from './textures/sprite-animated';
 import {SocketConnector} from './connection';
-import { NearestFilter } from 'three';
+import { NearestFilter, Object3D, Sprite } from 'three';
+import { EventEmitter } from 'events';
 
 require ('./assets/q.jpg');
 require ('./assets/w.png');
@@ -14,6 +15,8 @@ window.onload = () =>{
 	document.onmousemove = mouseMoveCameraListen;
 	document.onkeydown = keyListen;
 	document.onwheel = scrollDirection;
+	document.getElementsByTagName('canvas')[0].onclick = readClick;
+	//document.onclick = readClick;
 	document.getElementById('leftcam').onclick = moveCamToLeft;
 	document.getElementById('rightcam').onclick = moveCamToRight;
 	document.getElementById('zoomout').onclick = moveCamToCloser;
@@ -23,6 +26,7 @@ window.onload = () =>{
 	document.getElementById('centercam').onclick = centerCamera;
 	document.getElementById('fullscreen').onclick = fullScreen;
 	document.getElementById('closefullscreen').onclick = closeFullScreen;
+	document.getElementById('changeSpriteAction+').onclick = changeSpriteAction;
 	
 }
 
@@ -80,13 +84,18 @@ const material = new THREE.MeshBasicMaterial({
 });
 
 //MAXGUARREANDING
+let selectedImage = 0;
+let slist = [];
+let alist = []
 const spriteAnimated = new SpriteAnimated();
 const movingImage = spriteAnimated.loadImage('./assets/w1.png', 1, 1, 9, 8, 100, 9, renderer.getMaxAnisotropy());
 spriteAnimated.setScale(10, 10, 1);
 spriteAnimated.setTranslation(-50,-10,0);
 spriteAnimated.setNumRow(6);
+movingImage.name="Gos 1";
 scene.add( movingImage );
-
+slist.push(movingImage);
+alist.push(spriteAnimated);
 
 
 
@@ -95,10 +104,12 @@ const thirdMovingImage = thirdSprite.loadImage('./assets/w1.gif', 1, 1, 9, 8, 10
 thirdSprite.flipSpriteY();
 thirdSprite.flipSpriteRads(1);
 thirdSprite.setNumRow(2);
-//thirdSprite.setFramesX(11);
 thirdSprite.setScale(10, 10, 1);
 thirdSprite.setTranslation(50,-10,0);
+thirdMovingImage.name="Gos 2";
 scene.add( thirdMovingImage );
+slist.push(thirdMovingImage);
+alist.push(thirdSprite);
 
 
 // create a box and add it to the scene
@@ -266,4 +277,45 @@ function scrollDirection(e: WheelEvent){
 		moveCamToFarther();
 	}
 }
+
+function moveSprite(event: MouseEvent){
+	let vec = new THREE.Vector3(); // create once and reuse
+	let pos = new THREE.Vector3(); // create once and reuse
+	vec.set(
+		( event.clientX / window.innerWidth ) * 2 - 1,
+		- ( event.clientY / window.innerHeight ) * 2 + 1,
+		0 );
+	vec.unproject( camera );
+	vec.sub( camera.position ).normalize();
+	var distance = - camera.position.z / vec.z;
+	pos.copy( camera.position ).add( vec.multiplyScalar( distance ) );
+	slist[selectedImage].position.x = pos.x;
+	slist[selectedImage].position.y = pos.y;
+}
+
+function readClick(event: MouseEvent){
+	let raycaster = new THREE.Raycaster();
+	let mouse = new THREE.Vector2();
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1; 
+	raycaster.setFromCamera( mouse, camera );   
+	let intersects = raycaster.intersectObjects( slist);
+	if (intersects.length > 0) {
+		selectedImage = slist.indexOf(intersects[0].object);
+		(<HTMLButtonElement>document.getElementById('selectedSprite')).value = slist[selectedImage].name;
+		(<HTMLButtonElement>document.getElementById('selectedAnimation')).value = alist[selectedImage].getNumRow();
+	}
+	if(intersects.length == 0){
+		moveSprite(event);
+	}
+}
+
+function changeSpriteAction(event: any){
+	event.preventDefault();
+	alist[selectedImage].setNumRow(alist[selectedImage].getNumRow()+1);
+	(<HTMLButtonElement>document.getElementById('selectedAnimation')).value = alist[selectedImage].getNumRow();
+
+	return false;
+}
+
 animate();
