@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import './connection';
 import { SpriteAnimated } from './textures/sprite-animated';
 import {SocketConnector} from './connection';
+import { NearestFilter } from 'three';
 
 require ('./assets/q.jpg');
 require ('./assets/w.png');
@@ -48,8 +49,6 @@ let maxCoordCameraDown = -40;
 
 let renderer = new THREE.WebGLRenderer();
 
-
-
 // set size
 renderer.setSize(window.innerWidth, window.innerHeight-4);
 
@@ -82,28 +81,21 @@ const material = new THREE.MeshBasicMaterial({
 
 //MAXGUARREANDING
 const spriteAnimated = new SpriteAnimated();
-const movingImage = spriteAnimated.loadImage('./assets/qw.png', 1, 1, 18, 13, 100, 18, renderer.getMaxAnisotropy());
+const movingImage = spriteAnimated.loadImage('./assets/w1.png', 1, 1, 9, 8, 100, 9, renderer.getMaxAnisotropy());
 spriteAnimated.setScale(10, 10, 1);
 spriteAnimated.setTranslation(-50,-10,0);
 spriteAnimated.setNumRow(6);
 scene.add( movingImage );
 
 
-var map = new THREE.TextureLoader().load( "q3.png" );
-var material2 = new THREE.SpriteMaterial( { map: map, color: 0xffffff } );
-var sprite = new THREE.Sprite( material2 );
-scene.add( sprite );
-sprite.scale.set(1,1,1);
-
 
 
 const thirdSprite = new SpriteAnimated();
-const thirdMovingImage = thirdSprite.loadImage('./assets/v.png', 1, 1, 10, 8, 100, 10, renderer.getMaxAnisotropy());
+const thirdMovingImage = thirdSprite.loadImage('./assets/w1.gif', 1, 1, 9, 8, 100, 9, renderer.capabilities.getMaxAnisotropy());
 thirdSprite.flipSpriteY();
 thirdSprite.flipSpriteRads(1);
-thirdSprite.setEndFrame(11);
-thirdSprite.setNumRow(1);
-thirdSprite.setFramesX(11);
+thirdSprite.setNumRow(2);
+//thirdSprite.setFramesX(11);
 thirdSprite.setScale(10, 10, 1);
 thirdSprite.setTranslation(50,-10,0);
 scene.add( thirdMovingImage );
