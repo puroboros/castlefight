@@ -15,8 +15,8 @@ window.onload = () =>{
 	document.onmousemove = mouseMoveCameraListen;
 	document.onkeydown = keyListen;
 	document.onwheel = scrollDirection;
+	document.getElementsByTagName('canvas')[0].oncontextmenu = readClick;
 	document.getElementsByTagName('canvas')[0].onclick = readClick;
-	//document.onclick = readClick;
 	document.getElementById('leftcam').onclick = moveCamToLeft;
 	document.getElementById('rightcam').onclick = moveCamToRight;
 	document.getElementById('zoomout').onclick = moveCamToCloser;
@@ -27,7 +27,9 @@ window.onload = () =>{
 	document.getElementById('fullscreen').onclick = fullScreen;
 	document.getElementById('closefullscreen').onclick = closeFullScreen;
 	document.getElementById('changeSpriteAction+').onclick = changeSpriteAction;
-	
+	document.getElementById('removeSprite').onclick = removeSprite;
+	document.getElementById('addSprite').onclick = addSprite;
+	document.getElementById('flipSprite').onclick = flipSprite;
 }
 
 const elem = document.documentElement;
@@ -84,9 +86,9 @@ const material = new THREE.MeshBasicMaterial({
 });
 
 //MAXGUARREANDING
+let imageNumber = 3;
 let selectedImage = 0;
-let slist = [];
-let alist = []
+let alist:SpriteAnimated[] = [];
 const spriteAnimated = new SpriteAnimated();
 const movingImage = spriteAnimated.loadImage('./assets/w1.png', 1, 1, 9, 8, 100, 9, renderer.getMaxAnisotropy());
 spriteAnimated.setScale(10, 10, 1);
@@ -94,7 +96,6 @@ spriteAnimated.setTranslation(-50,-10,0);
 spriteAnimated.setNumRow(6);
 movingImage.name="Gos 1";
 scene.add( movingImage );
-slist.push(movingImage);
 alist.push(spriteAnimated);
 
 
@@ -108,7 +109,6 @@ thirdSprite.setScale(10, 10, 1);
 thirdSprite.setTranslation(50,-10,0);
 thirdMovingImage.name="Gos 2";
 scene.add( thirdMovingImage );
-slist.push(thirdMovingImage);
 alist.push(thirdSprite);
 
 
@@ -170,6 +170,10 @@ function moveCamToCloser(){
 function moveCamToFarther(){
 	moveCam(0,0,1);
 }
+function moveSprite1px(x,y){
+	alist[selectedImage].sprite.position.x += x;
+	alist[selectedImage].sprite.position.y += y;
+}
 
 function moveCam(tweakX: number, tweakY: number, tweakZ: number){
 	camera.position.x += tweakX;
@@ -179,16 +183,36 @@ function moveCam(tweakX: number, tweakY: number, tweakZ: number){
 
 function keyListen(e: KeyboardEvent){
     if (e.keyCode === 38) {
-        moveCamToUp();
+		if(selectedImage===-1){
+			moveCamToUp();
+		}
+		else{
+			moveSprite1px(0,1);
+		}
     }
     else if (e.keyCode === 40) {
-        moveCamToDown();
+		if(selectedImage===-1){
+			moveCamToDown();
+		}
+		else{
+			moveSprite1px(0,-1);
+		}
     }
     else if (e.keyCode === 37) {
-       moveCamToLeft();
+		if(selectedImage===-1){
+			   moveCamToLeft();
+		}
+		else{
+			moveSprite1px(-1,0);
+		}
     }
     else if (e.keyCode === 39) {
-       moveCamToRight();
+		if(selectedImage===-1){
+		   moveCamToRight();
+		}
+		else{
+			moveSprite1px(1,0);
+		}
 	}
 	else if (e.keyCode === 107) {
 		moveCamToCloser();
@@ -289,33 +313,81 @@ function moveSprite(event: MouseEvent){
 	vec.sub( camera.position ).normalize();
 	var distance = - camera.position.z / vec.z;
 	pos.copy( camera.position ).add( vec.multiplyScalar( distance ) );
-	slist[selectedImage].position.x = pos.x;
-	slist[selectedImage].position.y = pos.y;
+	alist[selectedImage].sprite.position.x = pos.x;
+	alist[selectedImage].sprite.position.y = pos.y;
 }
 
 function readClick(event: MouseEvent){
 	let raycaster = new THREE.Raycaster();
 	let mouse = new THREE.Vector2();
+	const spriteArray = alist.map(spriteAnimated=>spriteAnimated.sprite);
 	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1; 
 	raycaster.setFromCamera( mouse, camera );   
-	let intersects = raycaster.intersectObjects( slist);
-	if (intersects.length > 0) {
-		selectedImage = slist.indexOf(intersects[0].object);
-		(<HTMLButtonElement>document.getElementById('selectedSprite')).value = slist[selectedImage].name;
-		(<HTMLButtonElement>document.getElementById('selectedAnimation')).value = alist[selectedImage].getNumRow();
-	}
-	if(intersects.length == 0){
+	let intersects = raycaster.intersectObjects( spriteArray);
+
+	if(event.button===2){
 		moveSprite(event);
+	}
+	else if(event.button===0){
+		if (intersects.length > 0) {
+			selectedImage = spriteArray.indexOf(intersects[0].object as Sprite);
+			updateTxt();
+		}
+		else if(intersects.length == 0){
+			selectedImage = -1;
+			updateTxt();
+		}
 	}
 }
 
 function changeSpriteAction(event: any){
 	event.preventDefault();
 	alist[selectedImage].setNumRow(alist[selectedImage].getNumRow()+1);
-	(<HTMLButtonElement>document.getElementById('selectedAnimation')).value = alist[selectedImage].getNumRow();
-
+	updateTxt();
 	return false;
 }
 
+function removeSprite(){
+	scene.remove(alist[selectedImage].sprite);
+	alist.splice(selectedImage,1);
+	if(selectedImage >= alist.length){
+		selectedImage = alist.length-1;
+	}
+	updateTxt();
+}
+
+function addSprite(){
+	const spriteAnimated = new SpriteAnimated();
+	const movingImage = spriteAnimated.loadImage('./assets/w1.png', 1, 1, 9, 8, 100, 9, renderer.getMaxAnisotropy());
+	spriteAnimated.setScale(10, 10, 1);
+	spriteAnimated.setTranslation(-50,-10,0);
+	spriteAnimated.setNumRow(6);
+	spriteAnimated.flipSpriteY();
+	spriteAnimated.flipSpriteRads(1);
+	movingImage.name="Gos "+imageNumber;
+	scene.add( movingImage );
+	alist.push(spriteAnimated);
+	selectedImage += 1;
+	imageNumber += 1;
+	updateTxt();
+}
+
+function flipSprite(){
+	alist[selectedImage].flipSpriteRads((alist[selectedImage].getInitialFrame()+1)%2);
+	alist[selectedImage].flipSpriteY();
+}
+
+
+function updateTxt(){
+	if(selectedImage=== -1){
+		(<HTMLButtonElement>document.getElementById('selectedSprite')).value = 'nada';
+		(<HTMLButtonElement>document.getElementById('selectedAnimation')).value = 'x';		
+	}
+	else{
+		(<HTMLButtonElement>document.getElementById('selectedSprite')).value = alist[selectedImage].sprite.name;
+		(<HTMLButtonElement>document.getElementById('selectedAnimation')).value = '' + alist[selectedImage].getNumRow();
+	}
+	
+}
 animate();

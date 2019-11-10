@@ -15,7 +15,7 @@ export class SpriteAnimated {
     private timer: any;
     private texture: THREE.Texture;
     private material: THREE.SpriteMaterial;
-    private sprite: THREE.Sprite;
+    public sprite: THREE.Sprite;
     private initialFrame: number = 0;
     constructor() {
     }
@@ -35,12 +35,9 @@ export class SpriteAnimated {
         this.y = 0;
         this.count = 0;
         this.texture = new THREE.TextureLoader().load(image);
-        //this.texture.wrapS = THREE.RepeatWrapping;
-        //this.texture.wrapT = THREE.RepeatWrapping;
         this.texture.minFilter = NearestFilter;
         this.texture.magFilter = NearestMipMapNearestFilter;
         this.texture.anisotropy = anisotropy;
-        //this.texture.magFilter = LinearMipMapNearestFilter;
         this.texture.repeat.set(1/framesX, 1/framesY);
         this.material = new THREE.SpriteMaterial({ map: this.texture, color: 0xffffff });
         this.sprite = new THREE.Sprite(this.material);
@@ -92,7 +89,7 @@ export class SpriteAnimated {
 
     flipSpriteY(){
         this.initialFrame = (this.initialFrame + 1) % 2;
-        this.texture.flipY = !this.texture.flipY;
+        this.texture.flipY = false;
     }
     getSpriteMaterial(){
         return this.material;
@@ -102,5 +99,8 @@ export class SpriteAnimated {
     }
     getNumRow(){
         return this.numRow;
+    }
+    getInitialFrame(){
+        return this.initialFrame;
     }
 }
