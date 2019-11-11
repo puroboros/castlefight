@@ -144,6 +144,29 @@ function render(): void {
 	if(constantMoveDownCamera){
 		camera.position.y = Math.max(camera.position.y-1,maxCoordCameraDown);
 	}
+	for(let i = 0; i < alist.length; i++){
+		if(alist[i].isMoving){
+			let newPosX = alist[i].sprite.position.x - alist[i].destiny.x;
+			let newPosY = alist[i].sprite.position.y - alist[i].destiny.y;
+			if(newPosY <0){
+				alist[i].sprite.position.y += Math.max(Math.min(1,Math.abs(newPosY)/Math.max(0.00001,Math.abs(newPosX))),newPosY);
+			}
+			else{
+				alist[i].sprite.position.y -= Math.min(Math.min(1,Math.abs(newPosY)/Math.max(0.00001,Math.abs(newPosX))),newPosY);
+
+			}
+			if(newPosX <0){
+				alist[i].sprite.position.x += Math.max(Math.min(1,Math.abs(newPosX)/Math.max(0.00001,Math.abs(newPosY))),newPosX);
+			}
+			else{
+				alist[i].sprite.position.x -= Math.min(Math.min(1,Math.abs(newPosX)/Math.max(0.00001,Math.abs(newPosY))),newPosX);
+			}
+			if(newPosX === 0 && newPosY === 0 ){
+				alist[i].stopMoving();
+			}
+			updateTxt();
+		}
+	}
 	renderer.render(scene, camera);
 }
 
@@ -313,8 +336,24 @@ function moveSprite(event: MouseEvent){
 	vec.sub( camera.position ).normalize();
 	var distance = - camera.position.z / vec.z;
 	pos.copy( camera.position ).add( vec.multiplyScalar( distance ) );
+	alist[selectedImage].sprite.translateX(pos.x);
+	alist[selectedImage].sprite.translateY(pos.y);
 	alist[selectedImage].sprite.position.x = pos.x;
 	alist[selectedImage].sprite.position.y = pos.y;
+}
+
+function spriteWalk(event: MouseEvent){
+	let vec = new THREE.Vector3(); // create once and reuse
+	let pos = new THREE.Vector3(); // create once and reuse
+	vec.set(
+		( event.clientX / window.innerWidth ) * 2 - 1,
+		- ( event.clientY / window.innerHeight ) * 2 + 1,
+		0 );
+	vec.unproject( camera );
+	vec.sub( camera.position ).normalize();
+	var distance = - camera.position.z / vec.z;
+	pos.copy( camera.position ).add( vec.multiplyScalar( distance ) );
+	alist[selectedImage].startMoving(pos);
 }
 
 function readClick(event: MouseEvent){
@@ -327,7 +366,7 @@ function readClick(event: MouseEvent){
 	let intersects = raycaster.intersectObjects( spriteArray);
 
 	if(event.button===2){
-		moveSprite(event);
+		spriteWalk(event);
 	}
 	else if(event.button===0){
 		if (intersects.length > 0) {
@@ -382,11 +421,14 @@ function flipSprite(){
 function updateTxt(){
 	if(selectedImage=== -1){
 		(<HTMLButtonElement>document.getElementById('selectedSprite')).value = 'nada';
-		(<HTMLButtonElement>document.getElementById('selectedAnimation')).value = 'x';		
+		(<HTMLButtonElement>document.getElementById('selectedAnimation')).value = 'x';
+		(<HTMLButtonElement>document.getElementById('spritePos')).value = 'nada';		
 	}
 	else{
 		(<HTMLButtonElement>document.getElementById('selectedSprite')).value = alist[selectedImage].sprite.name;
 		(<HTMLButtonElement>document.getElementById('selectedAnimation')).value = '' + alist[selectedImage].getNumRow();
+		(<HTMLButtonElement>document.getElementById('spritePos')).value = alist[selectedImage].sprite.position.x+' | '+alist[selectedImage].sprite.position.y;		
+
 	}
 	
 }

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { LinearMipMapLinearFilter, LinearMipMapNearestFilter, LinearFilter, NearestFilter, NearestMipMapNearestFilter, NearestMipMapLinearFilter } from 'three';
+import { LinearMipMapLinearFilter, LinearMipMapNearestFilter, LinearFilter, NearestFilter, NearestMipMapNearestFilter, NearestMipMapLinearFilter, Vec2, Vector3 } from 'three';
 
 export class SpriteAnimated {
     private endFrame: number;
@@ -17,6 +17,8 @@ export class SpriteAnimated {
     private material: THREE.SpriteMaterial;
     public sprite: THREE.Sprite;
     private initialFrame: number = 0;
+    public isMoving: boolean = false;
+    public destiny: Vector3;
     constructor() {
     }
 
@@ -102,5 +104,18 @@ export class SpriteAnimated {
     }
     getInitialFrame(){
         return this.initialFrame;
+    }
+    startMoving(destiny: Vector3){
+        this.isMoving = true;
+        this.destiny = destiny;
+        this.setFramesX(8);
+        this.setEndFrame(8);
+        this.setNumRow(4);
+    }
+    stopMoving(){
+        this.isMoving = false;
+        this.setFramesX(9);
+        this.setEndFrame(9);
+        this.setNumRow(5);
     }
 }
