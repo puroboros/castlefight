@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { LinearMipMapLinearFilter, LinearMipMapNearestFilter, LinearFilter, NearestFilter, NearestMipMapNearestFilter, NearestMipMapLinearFilter } from 'three';
+import { LinearMipMapLinearFilter, LinearMipMapNearestFilter, LinearFilter, NearestFilter, NearestMipMapNearestFilter, NearestMipMapLinearFilter, Vec2, Vector3 } from 'three';
 
 export class SpriteAnimated {
     private endFrame: number;
@@ -15,8 +15,10 @@ export class SpriteAnimated {
     private timer: any;
     private texture: THREE.Texture;
     private material: THREE.SpriteMaterial;
-    private sprite: THREE.Sprite;
+    public sprite: THREE.Sprite;
     private initialFrame: number = 0;
+    public isMoving: boolean = false;
+    public destiny: Vector3;
     constructor() {
     }
 
@@ -35,12 +37,9 @@ export class SpriteAnimated {
         this.y = 0;
         this.count = 0;
         this.texture = new THREE.TextureLoader().load(image);
-        //this.texture.wrapS = THREE.RepeatWrapping;
-        //this.texture.wrapT = THREE.RepeatWrapping;
         this.texture.minFilter = NearestFilter;
         this.texture.magFilter = NearestMipMapNearestFilter;
         this.texture.anisotropy = anisotropy;
-        //this.texture.magFilter = LinearMipMapNearestFilter;
         this.texture.repeat.set(1/framesX, 1/framesY);
         this.material = new THREE.SpriteMaterial({ map: this.texture, color: 0xffffff });
         this.sprite = new THREE.Sprite(this.material);
@@ -70,8 +69,8 @@ export class SpriteAnimated {
     }
 
     setNumRow(numRow: number){
-        if(numRow > this.framesY || numRow < 0){
-            this.numRow = 0;
+        if(numRow >= this.framesY+this.initialFrame || numRow < 0){
+            this.numRow = this.initialFrame;
         }
         else{
             this.numRow = numRow;
@@ -92,6 +91,31 @@ export class SpriteAnimated {
 
     flipSpriteY(){
         this.initialFrame = (this.initialFrame + 1) % 2;
-        this.texture.flipY = !this.texture.flipY;
+        this.texture.flipY = false;
+    }
+    getSpriteMaterial(){
+        return this.material;
+    }
+    getSprite(){
+        return this.sprite;
+    }
+    getNumRow(){
+        return this.numRow;
+    }
+    getInitialFrame(){
+        return this.initialFrame;
+    }
+    startMoving(destiny: Vector3){
+        this.isMoving = true;
+        this.destiny = destiny;
+        this.setFramesX(8);
+        this.setEndFrame(8);
+        this.setNumRow(4);
+    }
+    stopMoving(){
+        this.isMoving = false;
+        this.setFramesX(9);
+        this.setEndFrame(9);
+        this.setNumRow(5);
     }
 }
