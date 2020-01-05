@@ -69,3 +69,5 @@ src/assets
 
 # package-lock
 package-lock.json
+
+.vscode/
