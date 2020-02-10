@@ -6,8 +6,8 @@ export class MenuLayout {
         this.connector = connector;
         this.populateMainMenu();
         console.log('olis');
-        this.connector.gameSelection.subscribe((response) => {
-            console.log('inside menu log constructor');
+        this.connector.gameSelection.subscribe((response: any) => {
+            console.log('inside menu log constructor ' + response.content);
             switch ((response as any).method) {
                 case 'menu':
                     this.getMatches((response as any).content);
