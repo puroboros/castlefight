@@ -5,9 +5,11 @@ import { SpriteAnimated } from './textures/sprite-animated';
 import {SocketConnector} from './connection';
 import { NearestFilter, Object3D, Sprite } from 'three';
 import { EventEmitter } from 'events';
+import {MenuLayout} from './main-menu/init';
 
 require ('./assets/q.jpg');
 require ('./assets/w.png');
+const socketConnector = new SocketConnector();
 
 window.onload = () =>{
 	
@@ -30,13 +32,11 @@ window.onload = () =>{
 	document.getElementById('removeSprite').onclick = removeSprite;
 	document.getElementById('addSprite').onclick = addSprite;
 	document.getElementById('flipSprite').onclick = flipSprite;
+	const menuLayout = new MenuLayout(socketConnector);
+	
 }
 
 const elem = document.documentElement;
-
-const socketConnector = new SocketConnector();
-
-socketConnector.send('hola');
 
 // create the scene
 const scene = new THREE.Scene();

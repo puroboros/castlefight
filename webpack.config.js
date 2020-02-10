@@ -10,7 +10,7 @@ const HTMLWebpackPluginConfig = new HtmlWebpackPlugin({
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
 const BrowserSyncPluginConfig = new BrowserSyncPlugin({
     host: 'localhost',
-    port: 3000,
+    port: 8080,
     proxy: 'http://localhost:8080/'
 }, config = {
     reload: false
@@ -43,7 +43,7 @@ module.exports = {
                 use: 'awesome-typescript-loader'
             }, {
                 test: /\.css$/,
-                exclude: /[\/\\]src[\/\\]/,
+                // include: /[\/\\]src[\/\\]/,
                 use: [
                     {
                         loader: 'style-loader',
@@ -58,7 +58,7 @@ module.exports = {
                 use: [
                     'file-loader']
             },
-            {
+            /*{
                 test: /\.css$/,
                 exclude: /[\/\\](node_modules|bower_components|public)[\/\\]/,
                 use: [
@@ -73,11 +73,11 @@ module.exports = {
                         options: {
                             modules: true,
                             importLoaders: 1,
-                            localIdentName: '[path]___[name]__[local]___[hash:base64:5]'
+                            //localIdentName: '[path]___[name]__[local]___[hash:base64:5]'
                         }
                     }
                 ]
-            }
+            }*/
         ]
     },
     resolve: { extensions: [".web.ts", ".web.js", ".ts", ".js", ".png"] },

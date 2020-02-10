@@ -5,7 +5,12 @@ import { Subject } from 'rxjs';
 export class SocketConnector {
     stompClient: Stomp.Client;
     socket: WebSocket;
+    username: string;
     connected: Subject<boolean> = new Subject<boolean>();
+    private internalGameSelection: Subject<object> = new Subject<object>();
+    get gameSelection() {
+        return this.internalGameSelection.asObservable();
+    }
     constructor() {
         this.connect();
     }
@@ -21,21 +26,20 @@ export class SocketConnector {
         this.stompClient.connect({}, (frame) => {
             console.log('Connected: ' + frame);
             this.connected.next(true);
-            this.stompClient.subscribe('/menu/game-selection', (greeting) => {
-                console.log(JSON.stringify(JSON.parse(greeting.body)));
-            });
             this.stompClient.subscribe('/user/menu/game-selection', (greeting) => {
                 console.log('PEPINO ' + JSON.stringify(JSON.parse(greeting.body)));
+                console.log(JSON.parse(greeting.body).method);
+                this.internalGameSelection.next(JSON.parse(greeting.body));
             });
         });
     }
 
-    send(info: string) {
+    send(info: any) {
         if (this.stompClient.connected) {
-            this.stompClient.send('/game/game-selection', {}, info);
+            this.stompClient.send('/game/game-selection', {}, JSON.stringify(info));
         } else {
-            this.connected.subscribe( connected => {
-                this.stompClient.send('/game/game-selection', {}, JSON.stringify({name: info}));
+            this.connected.subscribe(connected => {
+                this.stompClient.send('/game/game-selection', {}, JSON.stringify(info));
             });
         }
     }
