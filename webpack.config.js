@@ -10,7 +10,7 @@ const HTMLWebpackPluginConfig = new HtmlWebpackPlugin({
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
 const BrowserSyncPluginConfig = new BrowserSyncPlugin({
     host: 'localhost',
-    port: 3000,
+    port: 8080,
     proxy: 'http://localhost:8080/'
 }, config = {
     reload: false
