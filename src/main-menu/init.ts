@@ -64,6 +64,8 @@ export class MenuLayout {
         } else {
             matchStatus += `<div id="other">Guest: Waiting</div>`;
         }
+        matchStatus += '<div id="main-menu-back">Back</div>';
         document.getElementById('main-menu-content').innerHTML = matchStatus;
+        document.getElementById('main-menu-back').onclick = () => this.populateMainMenu();
     }
 }

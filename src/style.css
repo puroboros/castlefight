@@ -42,3 +42,16 @@ canvas{
 #main-menu-content div:first-child{
     margin-top: 0px;
 }
+
+#toaster{
+    position: absolute;
+    visibility: hidden;
+    right: 5px;
+    top: 5px;
+    border-radius: 5px;
+    border-color: red;
+    border-style: solid;
+    border-width: 2px;
+    color: white;
+    background-color: hotpink;
+}
