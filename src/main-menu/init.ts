@@ -64,8 +64,13 @@ export class MenuLayout {
         } else {
             matchStatus += `<div id="other">Guest: Waiting</div>`;
         }
+        matchStatus += '<div id="main-menu-cancel">Cancel</div>';
         matchStatus += '<div id="main-menu-back">Back</div>';
         document.getElementById('main-menu-content').innerHTML = matchStatus;
         document.getElementById('main-menu-back').onclick = () => this.populateMainMenu();
+        document.getElementById('main-menu-cancel').onclick = () => {
+            this.connector.send({action: 'closeMatch', details: match.player1.id});
+            this.populateMainMenu();
+        };
     }
 }
