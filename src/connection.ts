@@ -27,10 +27,16 @@ export class SocketConnector {
             console.log('Connected: ' + frame);
             this.connected.next(true);
             this.stompClient.subscribe('/user/menu/game-selection', (greeting) => {
+
                 console.log('PEPINO ' + JSON.stringify(JSON.parse(greeting.body)));
                 console.log(JSON.parse(greeting.body).method);
                 this.internalGameSelection.next(JSON.parse(greeting.body));
+                if(JSON.parse(greeting.body) .method === 'error'){
+                    this.displayToasterError('Error:', JSON.parse(greeting.body).content);
+                }
             });
+        }, error => {
+            this.displayToasterError('Connection Error:', error);
         });
     }
 
@@ -44,5 +50,8 @@ export class SocketConnector {
         }
     }
 
-
+    displayToasterError(title, error) {
+        document.getElementById('toaster').innerHTML=title + ' ' + error;
+        document.getElementById('toaster').style.visibility = 'visible';
+    }
 }
