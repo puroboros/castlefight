@@ -1,6 +1,7 @@
 import { SocketConnector } from '../connection';
 
 export class MenuLayout {
+    private currentMatch: any;
     private connector: SocketConnector;
     constructor(connector: SocketConnector) {
         this.connector = connector;
@@ -23,6 +24,9 @@ export class MenuLayout {
                 case 'joined':
                     this.joinMatch((response as any).content);
                 break;
+                case 'updateStatus':
+                    
+                    break;
                 default:
                     break;
             }
@@ -58,14 +62,45 @@ export class MenuLayout {
     };
 
     joinMatch(match: any) {
-        let matchStatus = `<div id="owner">Owner: ${match.player1.id}</div>`;
-        if (match.player2) {
-            matchStatus += `<div id="other">Guest: ${match.player2.id}</div>`;
-        } else {
-            matchStatus += `<div id="other">Guest: Waiting</div>`;
+        this.currentMatch = match;
+        let matchStatus = `<div id="owner"><input type="checkbox" id="${match.player1.id}" class="" readonly disabled />Owner: ${match.player1.id}</div>`;
+        for(let i = 0; i < match.maxPlayers; i++){
+            if (match.players[i]) {
+                
+                matchStatus += `<div id="other"><div id="owner"><input type="checkbox" id="${match.players[i].id}" class="" readonly disabled />Guest: ${match.players[i].id}</div>`;
+                document.getElementById(match.players[i].id).onclick = (event) =>  this.ready(event);
+            } else {
+                matchStatus += `<div>Guest: Waiting</div>`;
+            }
+        }
+
+        if(match.player1.id === this.connector.username){
+            matchStatus += '<input type="button" value="Start!"  disabled>'    
         }
         matchStatus += '<div id="main-menu-back">Back</div>';
+        matchStatus+= '<div>0</div>'
         document.getElementById('main-menu-content').innerHTML = matchStatus;
+        const element = (document.getElementById(this.connector.username) as any);
+        element.disabled = false;
+        element.readonly=false;
+        
         document.getElementById('main-menu-back').onclick = () => this.populateMainMenu();
+        
+    }
+
+    ready(e: any){
+        if(e.target.value === true){
+            this.updateStatus("ready");
+        }
+        else{
+            this.updateStatus("waiting");
+        }
+    }
+
+    updateStatus(status: string){
+        this.connector.send({
+            action:'playerReady',
+            details: this.currentMatch.id.toString() + '\n' + this.connector.username.toString() + '\n' + status
+        })
     }
 }

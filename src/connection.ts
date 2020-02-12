@@ -24,7 +24,8 @@ export class SocketConnector {
         this.stompClient = Stomp.over(this.socket);
         this.stompClient.debug = null;
         this.stompClient.connect({}, (frame) => {
-            console.log('Connected: ' + frame);
+            console.log('Connected: ' + frame.toString());
+            this.username = frame.toString().split('\n')[1].split(':')[1];
             this.connected.next(true);
             this.stompClient.subscribe('/user/menu/game-selection', (greeting) => {
 
