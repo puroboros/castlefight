@@ -90,6 +90,7 @@ export class MenuLayout {
         if(match.owner === this.connector.username){
             matchStatus += `<div style="margin-top:10px;"><input type="button" value="Start!" style="test-align:center;" ${countPlayersReady!==match.players.length&&'disabled'} /></div>`;    
         }
+        matchStatus += '<div id="main-menu-cancel">Cancel</div>';
         matchStatus += '<div id="main-menu-back">Back</div>';
 
         matchStatus+= `<div>${countPlayersReady}/${match.players.length}</div>`;
@@ -100,7 +101,10 @@ export class MenuLayout {
         element.onchange = (event) =>  this.ready(event);
         
         document.getElementById('main-menu-back').onclick = () => this.populateMainMenu();
-        
+        document.getElementById('main-menu-cancel').onclick = () => {
+            this.connector.send({action: 'closeMatch', details: match.player1.id});
+            this.populateMainMenu();
+        };
     }
 
     ready(e: any){
