@@ -25,7 +25,7 @@ export class MenuLayout {
                     this.joinMatch((response as any).content);
                 break;
                 case 'updateStatus':
-                    
+                    this.joinMatch((response as any).content);
                     break;
                 default:
                     break;
@@ -51,45 +51,60 @@ export class MenuLayout {
     getMatches(response: object) {
         console.log(response);
         let matches: string = (response as Array<any>).reduce((total, current) => {
-            return total += `<div id="match-${current.player1.id}">${current.player1.id}</div>`
+            return total += `<div id="match-${current.owner}">${current.owner}</div>`
         }, '');
         matches += '<div id="main-menu-back">Back</div>';
         document.getElementById('main-menu-content').innerHTML = matches;
         document.getElementById('main-menu-back').onclick = () => this.populateMainMenu();
         (response as Array<any>).forEach(element => {
-            document.getElementById(`match-${element.player1.id}`).onclick = () => this.connector.send({ action: 'joinMatch', details: element.player1.id });
+            document.getElementById(`match-${element.owner}`).onclick = () => this.connector.send({ action: 'joinMatch', details: element.owner });
         });
     };
 
     joinMatch(match: any) {
         this.currentMatch = match;
-        let matchStatus = `<div id="owner"><input type="checkbox" id="${match.player1.id}" class="" readonly disabled />Owner: ${match.player1.id}</div>`;
+        let matchStatus;
+        //let matchStatus = `<div id="owner"><input type="checkbox" id="${match.owner}" class="" readonly disabled />Owner: ${match.owner}</div>`;
         for(let i = 0; i < match.maxPlayers; i++){
             if (match.players[i]) {
-                
-                matchStatus += `<div id="other"><div id="owner"><input type="checkbox" id="${match.players[i].id}" class="" readonly disabled />Guest: ${match.players[i].id}</div>`;
-                document.getElementById(match.players[i].id).onclick = (event) =>  this.ready(event);
+                if(match.players[i].status==='ready'){
+                    matchStatus += `<div id="other"><div id="owner"><input type="checkbox" id="${match.players[i].id}" class="" readonly disabled checked />Guest: ${match.players[i].id}</div>`;
+                }
+                else{
+                    matchStatus += `<div id="other"><div id="owner"><input type="checkbox" id="${match.players[i].id}" class="" readonly disabled />Guest: ${match.players[i].id}</div>`;
+                }
             } else {
-                matchStatus += `<div>Guest: Waiting</div>`;
+                matchStatus += `<div>EMPTY</div>`;
             }
         }
-
-        if(match.player1.id === this.connector.username){
-            matchStatus += '<input type="button" value="Start!"  disabled>'    
+        const countPlayersReady = match.players.reduce((playersReady,player)=>{
+            console.log('players ready: '+playersReady +'\n player: '+JSON.stringify(player));
+            if(player.status==='ready'){
+                return playersReady+1;
+            }
+            else{
+                return playersReady;
+            }
+            
+        },0);
+        if(match.owner === this.connector.username){
+            matchStatus += `<div style="margin-top:10px;"><input type="button" value="Start!" style="test-align:center;" ${countPlayersReady!==match.players.length&&'disabled'} /></div>`;    
         }
         matchStatus += '<div id="main-menu-back">Back</div>';
-        matchStatus+= '<div>0</div>'
+
+        matchStatus+= `<div>${countPlayersReady}/${match.players.length}</div>`;
         document.getElementById('main-menu-content').innerHTML = matchStatus;
         const element = (document.getElementById(this.connector.username) as any);
         element.disabled = false;
         element.readonly=false;
+        element.onchange = (event) =>  this.ready(event);
         
         document.getElementById('main-menu-back').onclick = () => this.populateMainMenu();
         
     }
 
     ready(e: any){
-        if(e.target.value === true){
+        if(e.target.checked === true){
             this.updateStatus("ready");
         }
         else{
@@ -103,4 +118,6 @@ export class MenuLayout {
             details: this.currentMatch.id.toString() + '\n' + this.connector.username.toString() + '\n' + status
         })
     }
+
+
 }

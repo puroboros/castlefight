@@ -9,6 +9,7 @@ const HTMLWebpackPluginConfig = new HtmlWebpackPlugin({
 /* Configure BrowserSync */
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin')
 const BrowserSyncPluginConfig = new BrowserSyncPlugin({
+    ghostMode: false,
     host: 'localhost',
     port: 8080,
     proxy: 'http://localhost:8080/'
