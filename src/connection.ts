@@ -1,6 +1,6 @@
 import * as Stomp from 'stompjs';
 import * as  SockJS from 'sockjs-client';
-import { Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 
 export class SocketConnector {
     stompClient: Stomp.Client;
@@ -8,13 +8,17 @@ export class SocketConnector {
     username: string;
     connected: Subject<boolean> = new Subject<boolean>();
     private internalGameSelection: Subject<object> = new Subject<object>();
-    get gameSelection() {
+    get gameSelection(): Observable<object> {
         return this.internalGameSelection.asObservable();
     }
     constructor() {
         this.connect();
     }
 
+    private internalGameEvent: Subject<object> = new Subject<object>();
+    get gameEvent(): Observable<object> {
+        return this.internalGameEvent.asObservable();
+    }
     connect() {
         if (this.stompClient) {
             this.stompClient.disconnect(() => { });
@@ -32,7 +36,17 @@ export class SocketConnector {
                 console.log('PEPINO ' + JSON.stringify(JSON.parse(greeting.body)));
                 console.log(JSON.parse(greeting.body).method);
                 this.internalGameSelection.next(JSON.parse(greeting.body));
-                if(JSON.parse(greeting.body) .method === 'error'){
+                if (JSON.parse(greeting.body).method === 'error') {
+                    this.displayToasterError('Error:', JSON.parse(greeting.body).content);
+                }
+            });
+
+            this.stompClient.subscribe('/user/game', (greeting) => {
+
+                console.log('PEPINO 2' + JSON.stringify(JSON.parse(greeting.body)));
+                console.log(JSON.parse(greeting.body).method);
+                this.internalGameEvent.next(JSON.parse(greeting.body));
+                if (JSON.parse(greeting.body).method === 'error') {
                     this.displayToasterError('Error:', JSON.parse(greeting.body).content);
                 }
             });
@@ -51,8 +65,19 @@ export class SocketConnector {
         }
     }
 
+    sendToGame(info: any) {
+        if (this.stompClient.connected) {
+            this.stompClient.send('/game/game', {}, JSON.stringify(info));
+        } else {
+            this.connected.subscribe(connected => {
+                this.stompClient.send('/game/game', {}, JSON.stringify(info));
+            });
+        }
+    }
+
     displayToasterError(title, error) {
-        document.getElementById('toaster').innerHTML=title + ' ' + error;
+        const closeButton = `<div onclick="document.getElementById('toaster').style.visibility = 'hidden'">X</div>`;
+        document.getElementById('toaster').innerHTML = title + ' ' + error + closeButton;
         document.getElementById('toaster').style.visibility = 'visible';
     }
 }

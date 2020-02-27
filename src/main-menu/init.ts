@@ -23,7 +23,7 @@ export class MenuLayout {
                     break;
                 case 'joined':
                     this.joinMatch((response as any).content);
-                break;
+                    break;
                 case 'updateStatus':
                     this.joinMatch((response as any).content);
                     break;
@@ -65,60 +65,62 @@ export class MenuLayout {
         this.currentMatch = match;
         let matchStatus;
         //let matchStatus = `<div id="owner"><input type="checkbox" id="${match.owner}" class="" readonly disabled />Owner: ${match.owner}</div>`;
-        for(let i = 0; i < match.maxPlayers; i++){
+        for (let i = 0; i < match.maxPlayers; i++) {
             if (match.players[i]) {
-                if(match.players[i].status==='ready'){
+                if (match.players[i].status === 'ready') {
                     matchStatus += `<div id="other"><div id="owner"><input type="checkbox" id="${match.players[i].id}" class="" readonly disabled checked />Guest: ${match.players[i].id}</div>`;
                 }
-                else{
+                else {
                     matchStatus += `<div id="other"><div id="owner"><input type="checkbox" id="${match.players[i].id}" class="" readonly disabled />Guest: ${match.players[i].id}</div>`;
                 }
             } else {
                 matchStatus += `<div>EMPTY</div>`;
             }
         }
-        const countPlayersReady = match.players.reduce((playersReady,player)=>{
-            console.log('players ready: '+playersReady +'\n player: '+JSON.stringify(player));
-            if(player.status==='ready'){
-                return playersReady+1;
+        const countPlayersReady = match.players.reduce((playersReady, player) => {
+            console.log('players ready: ' + playersReady + '\n player: ' + JSON.stringify(player));
+            if (player.status === 'ready') {
+                return playersReady + 1;
             }
-            else{
+            else {
                 return playersReady;
             }
-            
-        },0);
-        if(match.owner === this.connector.username){
-            matchStatus += `<div style="margin-top:10px;"><input type="button" value="Start!" style="test-align:center;" ${countPlayersReady!==match.players.length&&'disabled'} /></div>`;    
+
+        }, 0);
+        if (match.owner === this.connector.username) {
+            matchStatus += `<div style="margin-top:10px;"><input type="button" value="Start!" style="test-align:center;" ${countPlayersReady !== match.players.length && 'disabled'} /></div>`;
+            matchStatus += '<div id="main-menu-cancel">Cancel</div>';
         }
-        matchStatus += '<div id="main-menu-cancel">Cancel</div>';
         matchStatus += '<div id="main-menu-back">Back</div>';
 
-        matchStatus+= `<div>${countPlayersReady}/${match.players.length}</div>`;
+        matchStatus += `<div>${countPlayersReady}/${match.players.length}</div>`;
         document.getElementById('main-menu-content').innerHTML = matchStatus;
         const element = (document.getElementById(this.connector.username) as any);
         element.disabled = false;
-        element.readonly=false;
-        element.onchange = (event) =>  this.ready(event);
-        
+        element.readonly = false;
+        element.onchange = (event) => this.ready(event);
+
         document.getElementById('main-menu-back').onclick = () => this.populateMainMenu();
-        document.getElementById('main-menu-cancel').onclick = () => {
-            this.connector.send({action: 'closeMatch', details: match.player1.id});
-            this.populateMainMenu();
-        };
+        if (match.owner === this.connector.username) {
+            document.getElementById('main-menu-cancel').onclick = () => {
+                this.connector.send({ action: 'closeMatch', details: match.owner });
+                this.populateMainMenu();
+            };
+        }
     }
 
-    ready(e: any){
-        if(e.target.checked === true){
+    ready(e: any) {
+        if (e.target.checked === true) {
             this.updateStatus("ready");
         }
-        else{
+        else {
             this.updateStatus("waiting");
         }
     }
 
-    updateStatus(status: string){
+    updateStatus(status: string) {
         this.connector.send({
-            action:'playerReady',
+            action: 'playerReady',
             details: this.currentMatch.id.toString() + '\n' + this.connector.username.toString() + '\n' + status
         })
     }
