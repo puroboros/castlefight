@@ -24,7 +24,7 @@ export class SocketConnector {
             this.stompClient.disconnect(() => { });
         }
         const url = window.location.hostname;
-        this.socket = new SockJS('http://' + url + ':80/websocket');
+        this.socket = new SockJS('http://' + url + ':1080/websocket');
         this.stompClient = Stomp.over(this.socket);
         this.stompClient.debug = null;
         this.stompClient.connect({}, (frame) => {
