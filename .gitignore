@@ -50,7 +50,7 @@ typings/
 .vscode/
 
 #images
-src/assets
+src/assets/
 
 # Optional REPL history
 .node_repl_history
@@ -71,3 +71,5 @@ src/assets
 package-lock.json
 
 .vscode/
+
+

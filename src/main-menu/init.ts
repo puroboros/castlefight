@@ -90,6 +90,9 @@ export class MenuLayout {
         if (match.owner === this.connector.username) {
             matchStatus += `<div style="margin-top:10px;"><input type="button" value="Start!" style="test-align:center;" ${countPlayersReady !== match.players.length && 'disabled'}  id="startButton"  /></div>`;
             matchStatus += '<div id="main-menu-cancel">Cancel</div>';
+            document.getElementById('main-menu-content').innerHTML = matchStatus;
+            const button = (document.getElementById('startButton') as any);
+            button.onclick = (event) =>  this.startGame();
         }
         matchStatus += '<div id="main-menu-back">Back</div>';
 
@@ -99,8 +102,7 @@ export class MenuLayout {
         element.disabled = false;
         element.readonly=false;
         element.onchange = (event) =>  this.ready(event);
-        const button = (document.getElementById('startButton') as any);
-        button.onclick = (event) =>  this.startGame();
+        
         
         document.getElementById('main-menu-back').onclick = () => this.populateMainMenu();
         if (match.owner === this.connector.username) {
