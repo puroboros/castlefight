@@ -1,69 +1,74 @@
-import { SocketConnector } from '../connection';
-
+import { join } from "path";
+import { Subject } from "rxjs";
+import { Match, Player } from '../connection';
 export class MenuLayout {
-    private currentMatch: any;
-    private connector: SocketConnector;
-    constructor(connector: SocketConnector) {
-        this.connector = connector;
+    public currentMatch: Match = {} as Match;
+    public emitter: Subject<any> = new Subject<any>();
+    public username: string = '';
+    public currentScreen = 'joinCreate';
+    public state: { matches: Match[], match: Match } = { matches: [], match: { players: [], owner: '', maxPlayers: 0, status: '', id: 0, troops: [] } };
+    get menuEventEmitter() {
+        return this.emitter.asObservable();
+    }
+    constructor() {
         this.populateMainMenu();
         console.log('olis');
-        this.connector.gameSelection.subscribe((response: any) => {
-            console.log('inside menu log constructor ' + response.content);
-            switch ((response as any).method) {
-                case 'menu':
-                    this.getMatches((response as any).content);
-                    break;
-                case 'create':
-                    this.joinMatch((response as any).content);
-                    break;
-                case 'join':
-                    if ((response as any).content !== 'error') {
-                        this.joinMatch((response as any).content);
-                    }
-                    break;
-                case 'joined':
-                    this.joinMatch((response as any).content);
-                    break;
-                case 'updateStatus':
-                    this.joinMatch((response as any).content);
-                    break;
-                default:
-                    break;
-            }
-        });
     }
 
 
     populateMainMenu() {
-        document.getElementById('main-menu-content').innerHTML =
-            `<div id="create-match">Create Match</div>
+        /*const mainMenu = document.getElementById('main-menu-content');
+        if (mainMenu) {
+            mainMenu.innerHTML =
+                `<div id="create-match">Create Match</div>
             <div id="join-match">Join Match</div>`;
-        document.getElementById('create-match').onclick = () => {
-            console.log('creating match');
-            this.connector.send({ action: 'createMatch', details: '0' });
-        };
-        document.getElementById('join-match').onclick = () => {
-            console.log('listing matches');
-            this.connector.send({ action: 'listMatches', details: '0' });
-        };
+        }
+
+        const createMatch = document.getElementById('create-match');
+        if (createMatch) {
+            createMatch.onclick = () => {
+                console.log('creating match');
+                this.emitter.next({ action: 'createMatch', details: '0' });
+            };
+        }
+        const joinMatch = document.getElementById('join-match');
+        if (joinMatch) {
+            joinMatch.onclick = () => {
+                console.log('listing matches');
+                this.emitter.next({ action: 'listMatches', details: '0' });
+            };
+        }*/
     }
 
-    getMatches(response: object) {
+    getMatches(response: Match[]) {
+        this.state.matches = response;
+        this.currentScreen = 'joinMatch';
         console.log(response);
-        let matches: string = (response as Array<any>).reduce((total, current) => {
+        let matches: string = response.reduce((total, current) => {
             return total += `<div id="match-${current.owner}">${current.owner}</div>`
         }, '');
         matches += '<div id="main-menu-back">Back</div>';
-        document.getElementById('main-menu-content').innerHTML = matches;
-        document.getElementById('main-menu-back').onclick = () => this.populateMainMenu();
-        (response as Array<any>).forEach(element => {
-            document.getElementById(`match-${element.owner}`).onclick = () => this.connector.send({ action: 'joinMatch', details: element.owner });
+        const mainMenuContent = document.getElementById('main-menu-content');
+        if (mainMenuContent) {
+            mainMenuContent.innerHTML = matches;
+        }
+        const mainMenuBasck = document.getElementById('main-menu-back');
+        if (mainMenuBasck) {
+            mainMenuBasck.onclick = () => this.populateMainMenu();
+        }
+        response.forEach(element => {
+            const match = document.getElementById(`match-${element.owner}`);
+            if (match) {
+                match.onclick = () => this.emitter.next({ action: 'joinMatch', details: element.owner });
+            }
         });
     };
 
-    joinMatch(match: any) {
+    joinMatch(match: Match) {
         this.currentMatch = match;
-        let matchStatus;
+        this.currentScreen = 'room';
+        /*
+        let matchStatus = '';
         //let matchStatus = `<div id="owner"><input type="checkbox" id="${match.owner}" class="" readonly disabled />Owner: ${match.owner}</div>`;
         for (let i = 0; i < match.maxPlayers; i++) {
             if (match.players[i]) {
@@ -87,29 +92,43 @@ export class MenuLayout {
             }
 
         }, 0);
-        if (match.owner === this.connector.username) {
+        if (match.owner === this.username) {
             matchStatus += `<div style="margin-top:10px;"><input type="button" value="Start!" style="test-align:center;" ${countPlayersReady !== match.players.length && 'disabled'}  id="startButton"  /></div>`;
             matchStatus += '<div id="main-menu-cancel">Cancel</div>';
-            document.getElementById('main-menu-content').innerHTML = matchStatus;
+            const mainMenuContent = document.getElementById('main-menu-content');
+            if (mainMenuContent) {
+                mainMenuContent.innerHTML = matchStatus;
+            }
+
             const button = (document.getElementById('startButton') as any);
-            button.onclick = (event) => this.startGame();
+            button.onclick = () => this.startGame();
         }
         matchStatus += '<div id="main-menu-back">Back</div>';
 
         matchStatus += `<div>${countPlayersReady}/${match.players.length}</div>`;
-        document.getElementById('main-menu-content').innerHTML = matchStatus;
-        const element = (document.getElementById(this.connector.username) as any);
+        const mainMenuContent = document.getElementById('main-menu-content');
+        if (mainMenuContent) {
+            mainMenuContent.innerHTML = matchStatus;
+        }
+        const element = (document.getElementById(this.username) as any);
         element.disabled = false;
         element.readonly = false;
-        element.onchange = (event) => this.ready(event);
+        element.onchange = (event: any) => this.ready(event);
 
-        document.getElementById('main-menu-back').onclick = () => this.populateMainMenu();
-        if (match.owner === this.connector.username) {
-            document.getElementById('main-menu-cancel').onclick = () => {
-                this.connector.send({ action: 'closeMatch', details: match.owner });
-                this.populateMainMenu();
-            };
+        const mainMenuBack = document.getElementById('main-menu-back');
+        if (mainMenuBack) {
+            mainMenuBack.onclick = () => this.populateMainMenu();
         }
+        if (match.owner === this.username) {
+            const mainMenuCancel = document.getElementById('main-menu-cancel');
+            if (mainMenuCancel) {
+                mainMenuCancel.onclick = () => {
+                    this.emitter.next({ action: 'closeMatch', details: match.owner });
+                    this.populateMainMenu();
+                };
+            }
+        }
+        */
     }
 
     ready(e: any) {
@@ -122,15 +141,15 @@ export class MenuLayout {
     }
 
     updateStatus(status: string) {
-        this.connector.send({
+        this.emitter.next({
             action: 'playerReady',
-            details: this.currentMatch.id.toString() + '\n' + this.connector.username.toString() + '\n' + status
+            details: this.currentMatch.id.toString() + '\n' + this.username.toString() + '\n' + status
         })
     }
 
 
     startGame() {
-        this.connector.send({
+        this.emitter.next({
             action: 'startGame',
             details: this.currentMatch.id.toString()
         })

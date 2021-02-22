@@ -1,48 +1,69 @@
 {
-  "name": "castlefight",
-  "version": "0.0.0",
-  "license": "MIT",
-  "scripts": {
-    "dev": "webpack --mode development && webpack-dev-server --host 0.0.0.0 --mode development",
-    "build": "webpack --mode production && webpack-dev-server --mode production",
-    "test": "ts-node node_modules/jasmine/bin/jasmine"
-  },
+  "name": "dungeonfight",
+  "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@stomp/rx-stomp": "^0.3.3",
-    "@types/sockjs-client": "^1.1.1",
-    "@types/stompjs": "^2.3.4",
-    "@types/three": "^0.93.5",
-    "net": "^1.0.2",
-    "rxjs": "^6.3.3",
-    "sockjs": "^0.3.19",
+    "@testing-library/jest-dom": "^5.11.4",
+    "@testing-library/react": "^11.1.0",
+    "@testing-library/user-event": "^12.1.10",
+    "@types/jest": "^26.0.15",
+    "@types/node": "^12.0.0",
+    "@types/react": "^16.9.53",
+    "@types/react-dom": "^16.9.8",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-redux": "^7.2.2",
+    "react-scripts": "4.0.2",
+    "redux": "^4.0.5",
+    "redux-devtools-extension": "^2.13.8",
+    "redux-saga": "^1.1.3",
+    "rxjs": "^6.6.3",
+    "sockjs-client": "^1.5.0",
     "stompjs": "^2.3.3",
-    "three": "^0.97.0"
+    "three": "^0.125.2",
+    "typescript": "^4.0.3",
+    "web-vitals": "^0.2.4",
+    "workbox-background-sync": "^5.1.3",
+    "workbox-broadcast-update": "^5.1.3",
+    "workbox-cacheable-response": "^5.1.3",
+    "workbox-core": "^5.1.3",
+    "workbox-expiration": "^5.1.3",
+    "workbox-google-analytics": "^5.1.3",
+    "workbox-navigation-preload": "^5.1.3",
+    "workbox-precaching": "^5.1.3",
+    "workbox-range-requests": "^5.1.3",
+    "workbox-routing": "^5.1.3",
+    "workbox-strategies": "^5.1.3",
+    "workbox-streams": "^5.1.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   },
   "devDependencies": {
-    "@types/jasmine": "^2.8.9",
-    "@types/node": "^10.12.1",
-    "@types/sockjs": "^0.3.31",
-    "awesome-typescript-loader": "^5.2.1",
-    "browser-sync": "^2.26.3",
-    "browser-sync-webpack-plugin": "^2.2.2",
-    "copy-webpack-plugin": "^5.0.4",
-    "css-loader": "^1.0.1",
-    "expose-loader": "^0.7.5",
-    "extract-text-webpack-plugin": "^3.0.2",
-    "file-loader": "^2.0.0",
-    "html-webpack-plugin": "^3.2.0",
-    "image-webpack-loader": "^6.0.0",
-    "jasmine": "^3.3.0",
-    "progress-bar-webpack-plugin": "^1.11.0",
-    "style-loader": "^0.23.1",
-    "tslint": "^5.11.0",
-    "ts-loader": "^5.2.2",
-    "ts-node": "^7.0.1",
-    "url-loader": "^2.1.0",
-    "typescript": "^3.1.4",
-    "webpack": "^4.23.1",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.10"
+    "@types/react-redux": "^7.1.16",
+    "@types/sockjs-client": "^1.5.0",
+    "@types/stompjs": "^2.3.4",
+    "node-sass": "^4.14.0"
   }
 }

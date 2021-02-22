@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { SpriteAnimated } from '../textures/sprite-animated';
-import { Sprite } from 'three';
+import { Object3D, Sprite } from 'three';
+import { Subject } from 'rxjs';
 
 export class View {
     elem: any;
@@ -8,7 +9,10 @@ export class View {
     camera: THREE.PerspectiveCamera;
     renderer: THREE.WebGLRenderer;
     axis: THREE.AxesHelper;
-
+    private emitter: Subject<any> = new Subject<any>();
+    get eventEmitter() {
+        return this.emitter.asObservable();
+    }
     animatedEntities: SpriteAnimated[] = [];
 
     constantMoveLeftCamera = false;
@@ -30,7 +34,11 @@ export class View {
         document.onwheel = this.scrollDirection.bind(this);
         this.elem = document.documentElement;
         this.scene = new THREE.Scene();
-        this.initCamera();
+        this.camera = new THREE.PerspectiveCamera(105, 1, 0.1, 1000);
+        this.camera.position.x = 0;
+        this.camera.position.y = 0;
+        this.camera.position.z = 50;
+        this.camera.lookAt(this.scene.position);
 
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(window.innerWidth, window.innerHeight - 4);
@@ -38,26 +46,65 @@ export class View {
         this.axis = new THREE.AxesHelper(10);
         this.addLightsToScene();
 
-        document.getElementsByTagName('canvas')[0].oncontextmenu = (event) =>  this.readClick(event);
-        document.getElementsByTagName('canvas')[0].onclick = (event) =>  this.readClick(event);
-        document.getElementById('leftcam').onclick = () => this.moveCamToLeft();
-        document.getElementById('rightcam').onclick = () => this.moveCamToRight();
-        document.getElementById('zoomout').onclick = () => this.moveCamToCloser();
-        document.getElementById('zoomin').onclick = () => this.moveCamToFarther();
-        document.getElementById('upcam').onclick = () => this.moveCamToUp();
-        document.getElementById('downcam').onclick = () => this.moveCamToDown();
-        document.getElementById('centercam').onclick =  () => this.centerCamera();
-        document.getElementById('fullscreen').onclick = () => this.fullScreen();
-        document.getElementById('closefullscreen').onclick = () => this.closeFullScreen();
-        document.getElementById('changeSpriteAction+').onclick = () => this.changeSpriteAction();
-        document.getElementById('removeSprite').onclick = () => this.removeSprite();
-        document.getElementById('addSprite').onclick = () => this.addSprite();
-        document.getElementById('flipSprite').onclick = () => this.flipSprite();
+        document.getElementsByTagName('canvas')[0].oncontextmenu = (event) => this.readClick(event);
+        document.getElementsByTagName('canvas')[0].onclick = (event) => this.readClick(event);
+        const leftCam = document.getElementById('leftcam');
+        if (leftCam) {
+            leftCam.onclick = () => this.moveCamToLeft();
+        }
+        const rightCam = document.getElementById('rightcam');
+        if (rightCam) {
+            rightCam.onclick = () => this.moveCamToRight();
+        }
+        const zoomOut = document.getElementById('zoomout');
+        if (zoomOut) {
+            zoomOut.onclick = () => this.moveCamToCloser();
+        }
+        const zoomIn = document.getElementById('zoomin');
+        if (zoomIn) {
+            zoomIn.onclick = () => this.moveCamToFarther();
+        }
+        const upCam = document.getElementById('upcam');
+        if (upCam) {
+            upCam.onclick = () => this.moveCamToUp();
+        }
+        const downCam = document.getElementById('downcam');
+        if (downCam) {
+            downCam.onclick = () => this.moveCamToDown();
+        }
+        const centerCam = document.getElementById('centercam');
+        if (centerCam) {
+            centerCam.onclick = () => this.centerCamera();
+        }
+        const fullScreen = document.getElementById('fullscreen');
+        if (fullScreen) {
+            fullScreen.onclick = () => this.fullScreen();
+        }
+        const closeFullScreen = document.getElementById('closefullscreen');
+        if (closeFullScreen) {
+            closeFullScreen.onclick = () => this.closeFullScreen();
+        }
+        const changeSpriteAction = document.getElementById('changeSpriteAction');
+        if (changeSpriteAction) {
+            changeSpriteAction.onclick = () => this.changeSpriteAction();
+        }
+        const removeSprite = document.getElementById('removeSprite');
+        if (removeSprite) {
+            removeSprite.onclick = () => this.removeSprite();
+        }
+        const addSprite = document.getElementById('addSprite');
+        if (addSprite) {
+            addSprite.onclick = () => this.addSprite();
+        }
+        const flipSprite = document.getElementById('flipSprite');
+        if (flipSprite) {
+            flipSprite.onclick = () => this.flipSprite();
+        }
 
         this.addGossos();
         this.animate();
     }
-    initCamera(){
+    initCamera() {
         this.camera = new THREE.PerspectiveCamera(105, 1, 0.1, 1000);
         this.camera.position.x = 0;
         this.camera.position.y = 0;
@@ -81,6 +128,7 @@ export class View {
         spriteAnimated.setTranslation(-50, -10, 0);
         spriteAnimated.setNumRow(6);
         movingImage.name = 'Gos 1';
+        spriteAnimated.id = 0;
         this.scene.add(movingImage);
         this.animatedEntities.push(spriteAnimated);
 
@@ -92,6 +140,7 @@ export class View {
         thirdSprite.setScale(10, 10, 1);
         thirdSprite.setTranslation(50, -10, 0);
         thirdMovingImage.name = 'Gos 2';
+        spriteAnimated.id = 1;
         this.scene.add(thirdMovingImage);
         this.animatedEntities.push(thirdSprite);
     }
@@ -115,27 +164,29 @@ export class View {
         if (this.constantMoveDownCamera) {
             this.camera.position.y = Math.max(this.camera.position.y - 1, this.maxCoordCameraDown);
         }
-        for (let i = 0; i < this.animatedEntities.length; i++) {
-            if (this.animatedEntities[i].isMoving) {
-                let newPosX = this.animatedEntities[i].sprite.position.x - this.animatedEntities[i].destiny.x;
-                let newPosY = this.animatedEntities[i].sprite.position.y - this.animatedEntities[i].destiny.y;
-                if (newPosY < 0) {
-                    this.animatedEntities[i].sprite.position.y += Math.max(Math.min(1, Math.abs(newPosY) / Math.max(0.00001, Math.abs(newPosX))), newPosY);
-                }
-                else {
-                    this.animatedEntities[i].sprite.position.y -= Math.min(Math.min(1, Math.abs(newPosY) / Math.max(0.00001, Math.abs(newPosX))), newPosY);
+        for (const entity of this.animatedEntities) {
+            if (entity.isMoving) {
+                if (entity.sprite && entity.destiny) {
+                    let newPosX = entity.sprite.position.x - entity.destiny.x;
+                    let newPosY = entity.sprite.position.y - entity.destiny.y;
+                    if (newPosY < 0) {
+                        entity.sprite.position.y += Math.max(Math.min(1, Math.abs(newPosY) / Math.max(0.00001, Math.abs(newPosX))), newPosY);
+                    }
+                    else {
+                        entity.sprite.position.y -= Math.min(Math.min(1, Math.abs(newPosY) / Math.max(0.00001, Math.abs(newPosX))), newPosY);
 
+                    }
+                    if (newPosX < 0) {
+                        entity.sprite.position.x += Math.max(Math.min(1, Math.abs(newPosX) / Math.max(0.00001, Math.abs(newPosY))), newPosX);
+                    }
+                    else {
+                        entity.sprite.position.x -= Math.min(Math.min(1, Math.abs(newPosX) / Math.max(0.00001, Math.abs(newPosY))), newPosX);
+                    }
+                    if (newPosX === 0 && newPosY === 0) {
+                        entity.stopMoving();
+                    }
+                    this.updateTxt();
                 }
-                if (newPosX < 0) {
-                    this.animatedEntities[i].sprite.position.x += Math.max(Math.min(1, Math.abs(newPosX) / Math.max(0.00001, Math.abs(newPosY))), newPosX);
-                }
-                else {
-                    this.animatedEntities[i].sprite.position.x -= Math.min(Math.min(1, Math.abs(newPosX) / Math.max(0.00001, Math.abs(newPosY))), newPosX);
-                }
-                if (newPosX === 0 && newPosY === 0) {
-                    this.animatedEntities[i].stopMoving();
-                }
-                this.updateTxt();
             }
         }
         this.renderer.render(this.scene, this.camera);
@@ -164,9 +215,12 @@ export class View {
     moveCamToFarther() {
         this.moveCam(0, 0, 1);
     }
-    moveSprite1px(x, y) {
-        this.animatedEntities[this.selectedImage].sprite.position.x += x;
-        this.animatedEntities[this.selectedImage].sprite.position.y += y;
+    moveSprite1px(x: number, y: number) {
+        const sprite = this.animatedEntities[this.selectedImage].sprite;
+        if (sprite) {
+            sprite.position.x += x;
+            sprite.position.y += y;
+        }
     }
 
     moveCam(tweakX: number, tweakY: number, tweakZ: number) {
@@ -229,6 +283,7 @@ export class View {
         else {
             this.constantMoveUpCamera = false;
         }
+        // eslint-disable-next-line no-restricted-globals
         if (e.x > screen.width - 10) {
             this.constantMoveRightCamera = true;
         }
@@ -256,6 +311,7 @@ export class View {
         else {
             this.constantMoveUpCamera = false;
         }
+        // eslint-disable-next-line no-restricted-globals
         if (e.x > screen.width - 10) {
             this.constantMoveRightCamera = true;
         }
@@ -277,6 +333,7 @@ export class View {
     }
 
     fullScreen() {
+        // eslint-disable-next-line no-restricted-globals
         this.renderer.setSize(screen.width, screen.height - 4);
         document.documentElement.requestFullscreen();
     }
@@ -297,6 +354,7 @@ export class View {
     }
 
     moveSprite(event: MouseEvent) {
+        // console.log('movesprite');
         let vec = new THREE.Vector3(); // create once and reuse
         let pos = new THREE.Vector3(); // create once and reuse
         vec.set(
@@ -307,13 +365,18 @@ export class View {
         vec.sub(this.camera.position).normalize();
         var distance = - this.camera.position.z / vec.z;
         pos.copy(this.camera.position).add(vec.multiplyScalar(distance));
-        this.animatedEntities[this.selectedImage].sprite.translateX(pos.x);
-        this.animatedEntities[this.selectedImage].sprite.translateY(pos.y);
-        this.animatedEntities[this.selectedImage].sprite.position.x = pos.x;
-        this.animatedEntities[this.selectedImage].sprite.position.y = pos.y;
+        const sprite = this.animatedEntities[this.selectedImage].sprite
+        if (sprite) {
+            sprite.translateX(pos.x);
+            sprite.translateY(pos.y);
+            sprite.position.x = pos.x;
+            sprite.position.y = pos.y;
+        }
+        // this.emitter.next({ action: 'moveUnit', details: `${this.animatedEntities[this.selectedImage].id}\n${pos.x}\n${pos.y}` });
     }
 
     spriteWalk(event: MouseEvent) {
+        console.log('spritewalk');
         let vec = new THREE.Vector3(); // create once and reuse
         let pos = new THREE.Vector3(); // create once and reuse
         vec.set(
@@ -324,7 +387,28 @@ export class View {
         vec.sub(this.camera.position).normalize();
         var distance = - this.camera.position.z / vec.z;
         pos.copy(this.camera.position).add(vec.multiplyScalar(distance));
-        this.animatedEntities[this.selectedImage].startMoving(pos);
+        if (this.animatedEntities[this.selectedImage]) {
+            this.animatedEntities[this.selectedImage].startMoving(pos);
+            this.emitter.next({ action: 'moveUnit', details: `${this.animatedEntities[this.selectedImage].id}\n${Math.round(pos.x)}\n${Math.round(pos.y)}` });
+        }
+    }
+
+    spriteWalkFromNet(id: number, x: number, y: number) {
+        console.log('spritewalk');
+        let vec = new THREE.Vector3(); // create once and reuse
+        let pos = new THREE.Vector3(); // create once and reuse
+        vec.set(
+            (x / window.innerWidth) * 2 - 1,
+            - (y / window.innerHeight) * 2 + 1,
+            0);
+        vec.unproject(this.camera);
+        vec.sub(this.camera.position).normalize();
+        var distance = - this.camera.position.z / vec.z;
+        pos.copy(this.camera.position).add(vec.multiplyScalar(distance));
+        const entity = this.animatedEntities.find(animatedEntity => animatedEntity.id === id);
+        if (entity) {
+            entity.startMoving(pos);
+        }
     }
 
     readClick(event: MouseEvent) {
@@ -334,7 +418,7 @@ export class View {
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
         raycaster.setFromCamera(mouse, this.camera);
-        let intersects = raycaster.intersectObjects(spriteArray);
+        let intersects = raycaster.intersectObjects(spriteArray as Object3D[]);
 
         if (event.button === 2) {
             this.spriteWalk(event);
@@ -349,6 +433,9 @@ export class View {
                 this.updateTxt();
             }
         }
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
     }
 
     changeSpriteAction() {
@@ -358,7 +445,10 @@ export class View {
     }
 
     removeSprite() {
-        this.scene.remove(this.animatedEntities[this.selectedImage].sprite);
+        const sprite = this.animatedEntities[this.selectedImage].sprite;
+        if (sprite) {
+            this.scene.remove(sprite);
+        }
         this.animatedEntities.splice(this.selectedImage, 1);
         if (this.selectedImage >= this.animatedEntities.length) {
             this.selectedImage = this.animatedEntities.length - 1;
@@ -394,10 +484,12 @@ export class View {
             (<HTMLButtonElement>document.getElementById('spritePos')).value = 'nada';
         }
         else {
-            (<HTMLButtonElement>document.getElementById('selectedSprite')).value = this.animatedEntities[this.selectedImage].sprite.name;
-            (<HTMLButtonElement>document.getElementById('selectedAnimation')).value = '' + this.animatedEntities[this.selectedImage].getNumRow();
-            (<HTMLButtonElement>document.getElementById('spritePos')).value = this.animatedEntities[this.selectedImage].sprite.position.x + ' | ' + this.animatedEntities[this.selectedImage].sprite.position.y;
-
+            const sprite = this.animatedEntities[this.selectedImage].sprite;
+            if (sprite) {
+                (<HTMLButtonElement>document.getElementById('selectedSprite')).value = sprite.name;
+                (<HTMLButtonElement>document.getElementById('selectedAnimation')).value = '' + this.animatedEntities[this.selectedImage].getNumRow();
+                (<HTMLButtonElement>document.getElementById('spritePos')).value = sprite.position.x + ' | ' + sprite.position.y;
+            }
         }
 
     }
