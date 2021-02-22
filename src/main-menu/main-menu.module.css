@@ -1,0 +1,16 @@
+.mainMenu {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+}
+
+.mainMenuContent {
+    position: relative;
+    left: -50%;
+    top: -50%;
+    padding: 20px;
+    border-radius: 25px;
+    border-color: darkgoldenrod;
+    border-width: 1px;
+    border-style: solid;
+}
