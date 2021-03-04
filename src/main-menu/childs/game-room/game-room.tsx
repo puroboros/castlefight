@@ -2,14 +2,20 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Player } from '../../../connection';
 import { Context } from '../../../core/context/context';
+import gameCoordinator from '../../../game-coordinator/game-coordinator';
 import { navigateAction } from '../../redux/main-menu.actions';
 import { useMainMenuReducerSelectedMatch } from '../../redux/main-menu.reducer';
 import styles from './game-room.module.scss';
 const GameRoom = () => {
     const context = useContext(Context);
+    //const [players,setPlayers] = useState<Player[]>([]);
     const username = context.menu.username;
     const match = useMainMenuReducerSelectedMatch();
     const dispatch = useDispatch();
+    /*useEffect(()=>{
+        setPlayers(match.players);
+        console.log('some',players.some(player => player.status!=='ready'));
+    },[match]);*/
     console.log('GameRoom match: ', match);
     const ready = (event: any) => {
         context.sendToMenu({
@@ -24,6 +30,11 @@ const GameRoom = () => {
         context.sendToMenu({ action: 'closeMatch', details: match.owner });
         back();
     }
+
+    const startGame = () => {
+        gameCoordinator.view.initScene();
+        dispatch(navigateAction('qwe'));
+    }
     return (<div className={styles.main}>
         {match.players.map((player: Player, index: number) =>
             <div key={index}>
@@ -31,10 +42,19 @@ const GameRoom = () => {
                     ? <> <input type="checkbox" disabled={player.id !== username} checked={player.status === 'ready'} onChange={ready} />Guest: {player.id}</>
                     : <>EMPTY</>}
             </div>)}
-        {match.owner === username &&
+        {match.owner === username &&<>
+            {(!match.players.some(player => player.status!=='ready' && player.id)) ?
+                <div onClick={startGame}>
+                    Start
+                </div>:
+                <div>
+                    Not Ready Yet
+                </div>
+            }
             <div onClick={cancelMatch}>
                 Cancel
-            </div>
+            </div></>
+
         }
         <div onClick={back}>
             Back

@@ -43,8 +43,8 @@ export type GameSelection = {
 }
 
 export class SocketConnector {
-    stompClient: Stomp.Client;
-    socket: WebSocket;
+    stompClient: Stomp.Client = {} as any;
+    socket: WebSocket = {} as any;
     username: string;
     connected: Subject<boolean> = new Subject<boolean>();
     private internalGameSelection: Subject<GameSelection> = new Subject<GameSelection>();
@@ -53,10 +53,8 @@ export class SocketConnector {
     }
     constructor() {
         this.username = '';
-        const url = window.location.hostname;
-        this.socket = new SockJS('http://' + url + ':1080/websocket');
-        this.stompClient = Stomp.over(this.socket);
-        this.connect();
+        
+
     }
 
     private internalGameEvent: Subject<object> = new Subject<object>();
@@ -64,6 +62,9 @@ export class SocketConnector {
         return this.internalGameEvent.asObservable();
     }
     connect() {
+        const url = window.location.hostname;
+        this.socket = new SockJS('http://' + url + ':1080/websocket');
+        this.stompClient = Stomp.over(this.socket);
         if (this.stompClient) {
             // this.stompClient.disconnect(() => { });
         }

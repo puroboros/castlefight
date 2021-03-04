@@ -28,13 +28,19 @@ export class View {
     selectedImage = 0;
 
     constructor() {
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(105, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer();
+        this.axis = new THREE.AxesHelper(10);
+    }
+
+    initScene(){
         document.onmouseout = this.mouseCachePoistionCameraListen.bind(this);
         document.onmousemove = this.mouseMoveCameraListen.bind(this);
         document.onkeydown = this.keyListen.bind(this);
         document.onwheel = this.scrollDirection.bind(this);
         this.elem = document.documentElement;
-        this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(105, 1, 0.1, 1000);
+        
         this.camera.position.x = 0;
         this.camera.position.y = 0;
         this.camera.position.z = 50;
@@ -43,67 +49,21 @@ export class View {
         this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(window.innerWidth, window.innerHeight - 4);
         document.body.appendChild(this.renderer.domElement);
-        this.axis = new THREE.AxesHelper(10);
         this.addLightsToScene();
 
         document.getElementsByTagName('canvas')[0].oncontextmenu = (event) => this.readClick(event);
         document.getElementsByTagName('canvas')[0].onclick = (event) => this.readClick(event);
-        const leftCam = document.getElementById('leftcam');
-        if (leftCam) {
-            leftCam.onclick = () => this.moveCamToLeft();
-        }
-        const rightCam = document.getElementById('rightcam');
-        if (rightCam) {
-            rightCam.onclick = () => this.moveCamToRight();
-        }
-        const zoomOut = document.getElementById('zoomout');
-        if (zoomOut) {
-            zoomOut.onclick = () => this.moveCamToCloser();
-        }
-        const zoomIn = document.getElementById('zoomin');
-        if (zoomIn) {
-            zoomIn.onclick = () => this.moveCamToFarther();
-        }
-        const upCam = document.getElementById('upcam');
-        if (upCam) {
-            upCam.onclick = () => this.moveCamToUp();
-        }
-        const downCam = document.getElementById('downcam');
-        if (downCam) {
-            downCam.onclick = () => this.moveCamToDown();
-        }
-        const centerCam = document.getElementById('centercam');
-        if (centerCam) {
-            centerCam.onclick = () => this.centerCamera();
-        }
-        const fullScreen = document.getElementById('fullscreen');
-        if (fullScreen) {
-            fullScreen.onclick = () => this.fullScreen();
-        }
-        const closeFullScreen = document.getElementById('closefullscreen');
-        if (closeFullScreen) {
-            closeFullScreen.onclick = () => this.closeFullScreen();
-        }
-        const changeSpriteAction = document.getElementById('changeSpriteAction');
-        if (changeSpriteAction) {
-            changeSpriteAction.onclick = () => this.changeSpriteAction();
-        }
-        const removeSprite = document.getElementById('removeSprite');
-        if (removeSprite) {
-            removeSprite.onclick = () => this.removeSprite();
-        }
-        const addSprite = document.getElementById('addSprite');
-        if (addSprite) {
-            addSprite.onclick = () => this.addSprite();
-        }
-        const flipSprite = document.getElementById('flipSprite');
-        if (flipSprite) {
-            flipSprite.onclick = () => this.flipSprite();
-        }
+
 
         this.addGossos();
         this.animate();
     }
+
+    deleteScene(){
+        document.body.removeChild(this.renderer.domElement);
+        this.removeAllSprites();
+    }
+
     initCamera() {
         this.camera = new THREE.PerspectiveCamera(105, 1, 0.1, 1000);
         this.camera.position.x = 0;
@@ -215,6 +175,31 @@ export class View {
     moveCamToFarther() {
         this.moveCam(0, 0, 1);
     }
+
+    cameraLooktoLeft(){
+ 
+        this.camera.rotateX(0.1);
+    }
+
+    cameraLooktoRight(){
+        this.camera.rotateX(-0.1);
+
+
+    }
+
+    cameraLooktoUp(){
+        this.camera.rotateY(0.1);
+    }
+
+    cameraLooktoDown(){
+        this.camera.rotateY(-0.1);
+    }
+
+    cameraLookReset(){
+        this.camera.lookAt(this.scene.position);
+    }
+
+
     moveSprite1px(x: number, y: number) {
         const sprite = this.animatedEntities[this.selectedImage].sprite;
         if (sprite) {
@@ -385,7 +370,7 @@ export class View {
             0);
         vec.unproject(this.camera);
         vec.sub(this.camera.position).normalize();
-        var distance = - this.camera.position.z / vec.z;
+        let distance = - this.camera.position.z / vec.z;
         pos.copy(this.camera.position).add(vec.multiplyScalar(distance));
         if (this.animatedEntities[this.selectedImage]) {
             this.animatedEntities[this.selectedImage].startMoving(pos);
@@ -454,6 +439,19 @@ export class View {
             this.selectedImage = this.animatedEntities.length - 1;
         }
         this.updateTxt();
+    }
+
+    removeAllSprites(){
+        while(this.animatedEntities.length){
+            if(this.animatedEntities[0].sprite){
+                this.scene.remove(this.animatedEntities[0].sprite)
+            }
+            this.animatedEntities.splice(0,1);
+        }
+        for (let animatedEntity of this.animatedEntities){
+            
+        }
+
     }
     addSprite() {
         const spriteAnimated = new SpriteAnimated();

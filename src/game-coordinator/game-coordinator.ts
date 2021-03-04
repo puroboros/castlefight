@@ -7,8 +7,10 @@ import { View } from '../view/view';
 export class GameCoordinator {
     private game?: Match;
     public menu: MenuLayout;
-    constructor(private connection: SocketConnector, private view: View, menu: MenuLayout) {
+    public view: View;
+    constructor(private connection: SocketConnector, view: View, menu: MenuLayout) {
         this.menu = menu;
+        this.view = view;
         view.eventEmitter.subscribe(event => {
             switch (event.action) {
                 case 'moveUnit':
@@ -95,6 +97,10 @@ export class GameCoordinator {
 
     sendToMenu(message: any) {
         this.connection.send(message);
+    }
+
+    connect(){
+        this.connection.connect();
     }
 
 }

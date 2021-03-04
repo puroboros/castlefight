@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Context } from '../core/context/context';
+import { TestStuff } from '../test-stuff/test-stuff';
 import GameRoom from './childs/game-room/game-room';
 import JoinCreateComponent from './childs/join-create/join-create';
 import ListRooms from './childs/list-rooms/list-rooms';
@@ -16,6 +17,7 @@ const MainMenu = () => {
                     {page === 'joinCreate' && <JoinCreateComponent ></JoinCreateComponent>}
                     {page === 'room' && <GameRoom ></GameRoom>}
                     {page === 'rooms' && <ListRooms ></ListRooms>}
+                    {page === 'game' && <TestStuff setTest={()=>null} ></TestStuff>}
                 </div>
             </div>}
         </>

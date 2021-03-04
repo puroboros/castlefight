@@ -1,42 +1,47 @@
 import React, { useEffect, useState } from 'react';
-import logo from './logo.svg';
+
 import './App.css';
-import { SocketConnector } from './connection';
-import { MenuLayout } from './main-menu/init';
-import { View } from './view/view';
+import {TestStuff} from './test-stuff/test-stuff';
 import gameCoordinator from './game-coordinator/game-coordinator';
-import { Context, ContextProvider } from './core/context/context';
+import { ContextProvider } from './core/context/context';
 import MainMenu from './main-menu/main-menu';
+import { useMainMenuReducerCurrentScreen } from './main-menu/redux/main-menu.reducer';
+import { useDispatch } from 'react-redux';
+import { navigateAction } from './main-menu/redux/main-menu.actions';
+
 function App() {
-  let connector: SocketConnector;
+  const [test, setTest] = useState(true);
+  const page = useMainMenuReducerCurrentScreen();
+  const dispatch = useDispatch();
+
+  const renderScene = ()=>{
+    dispatch(navigateAction('test'));
+    gameCoordinator.view.initScene();
+    setTest(false);
+  }
+
 
   return (
     <>
-      {gameCoordinator && <ContextProvider value={gameCoordinator}>
-        <div id="toaster"></div>
-        <div style={{ position: 'absolute' }}>
-          <button id="leftcam">&lt;</button>
-          <button id="rightcam">&gt;</button>
-          <button id="zoomout">+</button>
-          <button id="zoomin">-</button>
-          <button id="upcam">^</button>
-          <button id="downcam">v</button>
-          <button id="centercam">*</button>
-          <button id="fullscreen">o</button>
-          <button id="closefullscreen">x</button>
-          <button id="changeSpriteAction+">action+</button>
-          <input type="text" size={1} id="selectedSprite" value="Gos 1" />
-          <input type="text" size={1} id="selectedAnimation" />
-          <button id="addSprite">new</button>
-          <button id="removeSprite">remove</button>
-          <button id="flipSprite">flip</button>
-          <input type="text" size={30} id="spritePos" />
+        <ContextProvider value={gameCoordinator}>
+        <div>
+          { page!=='test'?<><button id="testStuff" onClick={renderScene}>test</button>
+            {/* gameCoordinator.menu.username!==''?*/}<div>
+            <MainMenu></MainMenu>
+            </div>:
+            <div>
+              <label htmlFor="id">ID</label>
+              <input type="text" name="id"></input>
+              <label htmlFor="password">Password</label>
+              <input type="text" name="password"></input>
+              <button id="Login" onClick={()=>gameCoordinator.connect()}>Login</button>
+            </div>
+          </>:<TestStuff setTest={setTest}></TestStuff>}
         </div>
-        <MainMenu></MainMenu>
-      </ContextProvider>}
-
+        </ContextProvider>
     </>
   );
+
 }
 
 export default App;
