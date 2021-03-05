@@ -1,0 +1,13 @@
+.container{
+    color: rgb(219, 8, 8);
+    float: left;
+    & button{
+        border-radius: 5px;
+        background-color: yellow;
+    }
+    .buttonsMoveCamera{
+        width: 60px;
+        float: left;
+    }
+}
+
