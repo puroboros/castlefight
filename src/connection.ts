@@ -77,7 +77,7 @@ export class SocketConnector {
                 this.connected.next(true);
                 this.stompClient.subscribe('/user/menu/game-selection', (greeting) => {
 
-                    console.log('PEPINO ', greeting.body);
+                    console.log('received from game-selection ', JSON.parse(greeting.body));
                     console.log(JSON.parse(greeting.body).method);
                     this.internalGameSelection.next(JSON.parse(greeting.body));
                     if (JSON.parse(greeting.body).method === 'error') {
@@ -87,7 +87,7 @@ export class SocketConnector {
 
                 this.stompClient.subscribe('/user/menu/game-command', (greeting) => {
 
-                    console.log('PEPINO 2' + JSON.stringify(JSON.parse(greeting.body)));
+                    console.log('received from game-command', JSON.parse(greeting.body));
                     console.log(JSON.parse(greeting.body).method);
                     this.internalGameEvent.next(JSON.parse(greeting.body));
                     if (JSON.parse(greeting.body).method === 'error') {

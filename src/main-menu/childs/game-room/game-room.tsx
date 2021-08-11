@@ -8,14 +8,9 @@ import { useMainMenuReducerSelectedMatch } from '../../redux/main-menu.reducer';
 import styles from './game-room.module.scss';
 const GameRoom = () => {
     const context = useContext(Context);
-    //const [players,setPlayers] = useState<Player[]>([]);
     const username = context.menu.username;
     const match = useMainMenuReducerSelectedMatch();
     const dispatch = useDispatch();
-    /*useEffect(()=>{
-        setPlayers(match.players);
-        console.log('some',players.some(player => player.status!=='ready'));
-    },[match]);*/
     console.log('GameRoom match: ', match);
     const ready = (event: any) => {
         context.sendToMenu({
@@ -32,8 +27,8 @@ const GameRoom = () => {
     }
 
     const startGame = () => {
-        gameCoordinator.view.initScene();
-        dispatch(navigateAction('qwe'));
+        context.sendToMenu({ action: 'startGame', details: match.id});
+        dispatch(navigateAction('game'));
     }
     return (<div className={styles.main}>
         {match.players.map((player: Player, index: number) =>

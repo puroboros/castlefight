@@ -9,6 +9,7 @@ export class View {
     camera: THREE.PerspectiveCamera;
     renderer: THREE.WebGLRenderer;
     axis: THREE.AxesHelper;
+    terrains: THREE.Mesh[] = [];
     private emitter: Subject<any> = new Subject<any>();
     get eventEmitter() {
         return this.emitter.asObservable();
@@ -34,40 +35,40 @@ export class View {
         this.axis = new THREE.AxesHelper(10);
     }
 
-    initScene(){
+    initScene() {
+        console.log('scene inited');
         document.onmouseout = this.mouseCachePoistionCameraListen.bind(this);
         document.onmousemove = this.mouseMoveCameraListen.bind(this);
         document.onkeydown = this.keyListen.bind(this);
         document.onwheel = this.scrollDirection.bind(this);
         this.elem = document.documentElement;
-        
-        this.camera.position.x = 0;
-        this.camera.position.y = 0;
-        this.camera.position.z = 50;
-        this.camera.lookAt(this.scene.position);
-
+        this.scene = new THREE.Scene();
+        this.initCamera();
+        console.log('position: ', this.scene.position);
         this.renderer = new THREE.WebGLRenderer();
+        this.renderer.setClearColor(0x111111)
         this.renderer.setSize(window.innerWidth, window.innerHeight - 4);
         document.body.appendChild(this.renderer.domElement);
         this.addLightsToScene();
-
+        console.log('canvas: ', document.getElementsByTagName('canvas'));
         document.getElementsByTagName('canvas')[0].oncontextmenu = (event) => this.readClick(event);
         document.getElementsByTagName('canvas')[0].onclick = (event) => this.readClick(event);
 
 
         this.addGossos();
         this.animate();
+        this.geometriks();
     }
 
-    deleteScene(){
+    deleteScene() {
         document.body.removeChild(this.renderer.domElement);
         this.removeAllSprites();
     }
 
     initCamera() {
-        this.camera = new THREE.PerspectiveCamera(105, 1, 0.1, 1000);
+        this.camera = new THREE.PerspectiveCamera(105, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.x = 0;
-        this.camera.position.y = 0;
+        this.camera.position.y = -15;
         this.camera.position.z = 50;
         this.camera.lookAt(this.scene.position);
 
@@ -103,6 +104,91 @@ export class View {
         spriteAnimated.id = 1;
         this.scene.add(thirdMovingImage);
         this.animatedEntities.push(thirdSprite);
+    }
+
+    geometriks(): void {
+        const geometry = new THREE.BufferGeometry();
+        // create a simple square shape. We duplicate the top left and bottom right
+        // vertices because each vertex needs to appear once per triangle. 
+        const vertexPositions = [
+            [-66.0, -66.0, -1.0],
+            [66.0, -66.0, -1.0],
+            [66.0, 66.0, -1.0],
+
+            [66.0, 66.0, -1.0],
+            [-66.0, 66.0, -1.0],
+            [-66.0, -66.0, -1.0],
+
+            [-66.0, -66.0, -7.0],
+            [66.0, -66.0, -7.0],
+            [66.0, 66.0, -7.0],
+
+            [66.0, 66.0, -7.0],
+            [-66.0, 66.0, -7.0],
+            [-66.0, -66.0, -7.0],
+
+            [-66.0, 66.0, -1.0],
+            [66.0, 66.0, -7.0],
+            [-66.0, 66.0, -7.0],
+
+            [-66.0, 66.0, -1.0],
+            [66.0, 66.0, -1.0],
+            [66.0, 66.0, -7.0],
+
+            [-66.0, -66.0, -1.0],
+            [66.0, -66.0, -7.0],
+            [-66.0, -66.0, -7.0],
+
+            [-66.0, -66.0, -1.0],
+            [66.0, -66.0, -1.0],
+            [66.0, -66.0, -7.0],
+
+            [-66.0, -66.0, -1.0],
+            [-66.0, -66.0, -7.0],
+            [-66.0, 66.0, -7.0],
+
+            [-66.0, 66.0, -1.0],
+            [-66.0, 66.0, -7.0],
+            [-66.0, -66.0, -1.0],
+
+            [66.0, -66.0, -1.0],
+            [66.0, -66.0, -7.0],
+            [66.0, 66.0, -7.0],
+
+            [66.0, 66.0, -1.0],
+            [66.0, 66.0, -7.0],
+            [66.0, -66.0, -1.0]
+        ];
+        const vertices = new Float32Array(vertexPositions.length * 3); // three components per vertex
+
+        // components of the position vector for each vertex are stored
+        // contiguously in the buffer.
+        for (let i = 0; i < vertexPositions.length; i++) {
+            vertices[i * 3 + 0] = vertexPositions[i][0];
+            vertices[i * 3 + 1] = vertexPositions[i][1];
+            vertices[i * 3 + 2] = vertexPositions[i][2];
+        }
+
+        // itemSize = 3 because there are 3 values (components) per vertex
+        geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+        geometry.getAttribute('uv');
+        const texture = new THREE.TextureLoader().load('./assets/w2.png');
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(4, 4);
+        const material = new THREE.LineBasicMaterial({
+            color: 0xffffff,
+            linewidth: 10,
+            linecap: 'round', //ignored by WebGLRenderer
+            linejoin: 'round' //ignored by WebGLRenderer
+        });
+        const edges = new THREE.EdgesGeometry(geometry);
+        const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffffff }));
+        const mesh = new THREE.Mesh(geometry, material);
+        this.terrains.push(mesh);
+        // this.scene.add(mesh);
+        this.scene.add(line);
+
     }
 
 
@@ -176,26 +262,26 @@ export class View {
         this.moveCam(0, 0, 1);
     }
 
-    cameraLooktoLeft(){
- 
+    cameraLooktoLeft() {
+
         this.camera.rotateX(0.1);
     }
 
-    cameraLooktoRight(){
+    cameraLooktoRight() {
         this.camera.rotateX(-0.1);
 
 
     }
 
-    cameraLooktoUp(){
+    cameraLooktoUp() {
         this.camera.rotateY(0.1);
     }
 
-    cameraLooktoDown(){
+    cameraLooktoDown() {
         this.camera.rotateY(-0.1);
     }
 
-    cameraLookReset(){
+    cameraLookReset() {
         this.camera.lookAt(this.scene.position);
     }
 
@@ -379,20 +465,15 @@ export class View {
     }
 
     spriteWalkFromNet(id: number, x: number, y: number) {
-        console.log('spritewalk');
+        console.log('spriteWalkFromNet');
         let vec = new THREE.Vector3(); // create once and reuse
-        let pos = new THREE.Vector3(); // create once and reuse
         vec.set(
-            (x / window.innerWidth) * 2 - 1,
-            - (y / window.innerHeight) * 2 + 1,
+            x,
+            y,
             0);
-        vec.unproject(this.camera);
-        vec.sub(this.camera.position).normalize();
-        var distance = - this.camera.position.z / vec.z;
-        pos.copy(this.camera.position).add(vec.multiplyScalar(distance));
         const entity = this.animatedEntities.find(animatedEntity => animatedEntity.id === id);
         if (entity) {
-            entity.startMoving(pos);
+            entity.startMoving(vec);
         }
     }
 
@@ -403,12 +484,22 @@ export class View {
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
         raycaster.setFromCamera(mouse, this.camera);
-        let intersects = raycaster.intersectObjects(spriteArray as Object3D[]);
 
         if (event.button === 2) {
-            this.spriteWalk(event);
+            if (this.selectedImage !== -1) {
+                console.log('selectedImage: ', this.selectedImage);
+                console.log('animatedEntities: ', this.animatedEntities);
+                const intersects = raycaster.intersectObjects(this.terrains);
+                console.log('intersects: ', intersects);
+                if (intersects.length) {
+                    this.spriteWalkFromNet(this.animatedEntities[this.selectedImage].id, intersects[0].point.x, intersects[0].point.y)
+                }
+            }
+            // this.spriteWalk(event);
         }
         else if (event.button === 0) {
+            const intersects = raycaster.intersectObjects(spriteArray as Object3D[]);
+            console.log('intersects: ', intersects);
             if (intersects.length > 0) {
                 this.selectedImage = spriteArray.indexOf(intersects[0].object as Sprite);
                 this.updateTxt();
@@ -417,6 +508,7 @@ export class View {
                 this.selectedImage = -1;
                 this.updateTxt();
             }
+            console.log('selectedImage: ', this.selectedImage);
         }
         event.preventDefault();
         event.stopPropagation();
@@ -441,21 +533,21 @@ export class View {
         this.updateTxt();
     }
 
-    removeAllSprites(){
-        while(this.animatedEntities.length){
-            if(this.animatedEntities[0].sprite){
+    removeAllSprites() {
+        while (this.animatedEntities.length) {
+            if (this.animatedEntities[0].sprite) {
                 this.scene.remove(this.animatedEntities[0].sprite)
             }
-            this.animatedEntities.splice(0,1);
+            this.animatedEntities.splice(0, 1);
         }
-        for (let animatedEntity of this.animatedEntities){
-            
+        for (let animatedEntity of this.animatedEntities) {
+
         }
 
     }
     addSprite() {
         const spriteAnimated = new SpriteAnimated();
-        const movingImage = spriteAnimated.loadImage('../assets/w1.png', 1, 1, 9, 8, 100, 9, this.renderer.capabilities.getMaxAnisotropy());
+        const movingImage = spriteAnimated.loadImage('./assets/w1.png', 1, 1, 9, 8, 100, 9, this.renderer.capabilities.getMaxAnisotropy());
         spriteAnimated.setScale(10, 10, 1);
         spriteAnimated.setTranslation(-50, -10, 0);
         spriteAnimated.setNumRow(6);
@@ -476,17 +568,19 @@ export class View {
 
 
     updateTxt() {
-        if (this.selectedImage === -1) {
-            (<HTMLButtonElement>document.getElementById('selectedSprite')).value = 'nada';
-            (<HTMLButtonElement>document.getElementById('selectedAnimation')).value = 'x';
-            (<HTMLButtonElement>document.getElementById('spritePos')).value = 'nada';
-        }
-        else {
-            const sprite = this.animatedEntities[this.selectedImage].sprite;
-            if (sprite) {
-                (<HTMLButtonElement>document.getElementById('selectedSprite')).value = sprite.name;
-                (<HTMLButtonElement>document.getElementById('selectedAnimation')).value = '' + this.animatedEntities[this.selectedImage].getNumRow();
-                (<HTMLButtonElement>document.getElementById('spritePos')).value = sprite.position.x + ' | ' + sprite.position.y;
+        if (document.getElementById('selectedSprite')) {
+            if (this.selectedImage === -1) {
+                (<HTMLButtonElement>document.getElementById('selectedSprite')).value = 'nada';
+                (<HTMLButtonElement>document.getElementById('selectedAnimation')).value = 'x';
+                (<HTMLButtonElement>document.getElementById('spritePos')).value = 'nada';
+            }
+            else {
+                const sprite = this.animatedEntities[this.selectedImage].sprite;
+                if (sprite) {
+                    (<HTMLButtonElement>document.getElementById('selectedSprite')).value = sprite.name;
+                    (<HTMLButtonElement>document.getElementById('selectedAnimation')).value = '' + this.animatedEntities[this.selectedImage].getNumRow();
+                    (<HTMLButtonElement>document.getElementById('spritePos')).value = sprite.position.x + ' | ' + sprite.position.y;
+                }
             }
         }
 

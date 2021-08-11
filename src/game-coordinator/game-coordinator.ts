@@ -25,17 +25,15 @@ export class GameCoordinator {
             }
         });
         connection.gameSelection.subscribe(response => {
-            console.log('pepino: ', response);
+            console.log('GameCoordinator connection gameselection: ', response);
             switch (response.method) {
                 case 'menu':
-                    // menu.getMatches(response.content as Match[]);
                     store.dispatch(listMatchesResponseAction((response.content as Match[])) as any);
                     break;
                 case 'create':
                     this.game = response.content as any;
                     console.log('this.game ', this.game);
                     store.dispatch(createMatchResponseAction(response.content as Match) as any)
-                    // menu.joinMatch(response.content as any);
                     break;
                 case 'closeMatch':
                     store.dispatch(closeGameAction() as any);
@@ -45,7 +43,6 @@ export class GameCoordinator {
                         this.game = response.content as any;
                         console.log('this.game ', this.game);
                         store.dispatch(joinMatchResponseAction((response.content as Match)) as any);
-                        // menu.joinMatch(response.content as any);
                     }
                     break;
                 case 'joined':
@@ -55,13 +52,25 @@ export class GameCoordinator {
                 case 'updateStatus':
                     store.dispatch(joinMatchResponseAction((response.content as Match)) as any);
                     break;
+                case 'start':
+                    this.view.initScene();
+                    break;
                 default:
                     break;
             }
         });
 
-        connection.gameEvent.subscribe(event => {
-            console.log('pepino: ' + event);
+        connection.gameEvent.subscribe((event: any) => {
+            switch (event.method) {
+                case 'moveUnit':
+                    console.log('game coordinator move unit troops:', event.content.troops)
+                    for (let troop of event.content.troops) {
+                        view.spriteWalkFromNet(troop.id, troop.position.first, troop.position.second);
+                    }
+                    break;
+                default:
+                    break;
+            }
         });
 
         connection.connected.subscribe(() => {
@@ -69,6 +78,7 @@ export class GameCoordinator {
         });
 
         menu.menuEventEmitter.subscribe((event: { action: string, details: string }) => {
+            console.log('received: ', event);
             switch (event.action) {
                 case 'createMatch':
                     connection.send(event);
@@ -99,7 +109,7 @@ export class GameCoordinator {
         this.connection.send(message);
     }
 
-    connect(){
+    connect() {
         this.connection.connect();
     }
 
