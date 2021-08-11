@@ -28,14 +28,12 @@ export class GameCoordinator {
             console.log('GameCoordinator connection gameselection: ', response);
             switch (response.method) {
                 case 'menu':
-                    // menu.getMatches(response.content as Match[]);
                     store.dispatch(listMatchesResponseAction((response.content as Match[])) as any);
                     break;
                 case 'create':
                     this.game = response.content as any;
                     console.log('this.game ', this.game);
                     store.dispatch(createMatchResponseAction(response.content as Match) as any)
-                    // menu.joinMatch(response.content as any);
                     break;
                 case 'closeMatch':
                     store.dispatch(closeGameAction() as any);
@@ -45,7 +43,6 @@ export class GameCoordinator {
                         this.game = response.content as any;
                         console.log('this.game ', this.game);
                         store.dispatch(joinMatchResponseAction((response.content as Match)) as any);
-                        // menu.joinMatch(response.content as any);
                     }
                     break;
                 case 'joined':
@@ -54,6 +51,9 @@ export class GameCoordinator {
                     break;
                 case 'updateStatus':
                     store.dispatch(joinMatchResponseAction((response.content as Match)) as any);
+                    break;
+                case 'start':
+                    this.view.initScene();
                     break;
                 default:
                     break;
@@ -78,6 +78,7 @@ export class GameCoordinator {
         });
 
         menu.menuEventEmitter.subscribe((event: { action: string, details: string }) => {
+            console.log('received: ', event);
             switch (event.action) {
                 case 'createMatch':
                     connection.send(event);
@@ -108,7 +109,7 @@ export class GameCoordinator {
         this.connection.send(message);
     }
 
-    connect(){
+    connect() {
         this.connection.connect();
     }
 

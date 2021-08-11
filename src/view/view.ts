@@ -35,7 +35,8 @@ export class View {
         this.axis = new THREE.AxesHelper(10);
     }
 
-    initScene(){
+    initScene() {
+        console.log('scene inited');
         document.onmouseout = this.mouseCachePoistionCameraListen.bind(this);
         document.onmousemove = this.mouseMoveCameraListen.bind(this);
         document.onkeydown = this.keyListen.bind(this);
@@ -49,7 +50,7 @@ export class View {
         this.renderer.setSize(window.innerWidth, window.innerHeight - 4);
         document.body.appendChild(this.renderer.domElement);
         this.addLightsToScene();
-
+        console.log('canvas: ', document.getElementsByTagName('canvas'));
         document.getElementsByTagName('canvas')[0].oncontextmenu = (event) => this.readClick(event);
         document.getElementsByTagName('canvas')[0].onclick = (event) => this.readClick(event);
 
@@ -59,7 +60,7 @@ export class View {
         this.geometriks();
     }
 
-    deleteScene(){
+    deleteScene() {
         document.body.removeChild(this.renderer.domElement);
         this.removeAllSprites();
     }
@@ -261,26 +262,26 @@ export class View {
         this.moveCam(0, 0, 1);
     }
 
-    cameraLooktoLeft(){
- 
+    cameraLooktoLeft() {
+
         this.camera.rotateX(0.1);
     }
 
-    cameraLooktoRight(){
+    cameraLooktoRight() {
         this.camera.rotateX(-0.1);
 
 
     }
 
-    cameraLooktoUp(){
+    cameraLooktoUp() {
         this.camera.rotateY(0.1);
     }
 
-    cameraLooktoDown(){
+    cameraLooktoDown() {
         this.camera.rotateY(-0.1);
     }
 
-    cameraLookReset(){
+    cameraLookReset() {
         this.camera.lookAt(this.scene.position);
     }
 
@@ -485,15 +486,20 @@ export class View {
         raycaster.setFromCamera(mouse, this.camera);
 
         if (event.button === 2) {
-            const intersects = raycaster.intersectObjects(this.terrains);
-            console.log('intersects: ', intersects);
-            if (intersects.length) {
-                this.spriteWalkFromNet(this.animatedEntities[this.selectedImage].id, intersects[0].point.x, intersects[0].point.y)
+            if (this.selectedImage !== -1) {
+                console.log('selectedImage: ', this.selectedImage);
+                console.log('animatedEntities: ', this.animatedEntities);
+                const intersects = raycaster.intersectObjects(this.terrains);
+                console.log('intersects: ', intersects);
+                if (intersects.length) {
+                    this.spriteWalkFromNet(this.animatedEntities[this.selectedImage].id, intersects[0].point.x, intersects[0].point.y)
+                }
             }
             // this.spriteWalk(event);
         }
         else if (event.button === 0) {
             const intersects = raycaster.intersectObjects(spriteArray as Object3D[]);
+            console.log('intersects: ', intersects);
             if (intersects.length > 0) {
                 this.selectedImage = spriteArray.indexOf(intersects[0].object as Sprite);
                 this.updateTxt();
@@ -502,6 +508,7 @@ export class View {
                 this.selectedImage = -1;
                 this.updateTxt();
             }
+            console.log('selectedImage: ', this.selectedImage);
         }
         event.preventDefault();
         event.stopPropagation();
@@ -526,15 +533,15 @@ export class View {
         this.updateTxt();
     }
 
-    removeAllSprites(){
-        while(this.animatedEntities.length){
-            if(this.animatedEntities[0].sprite){
+    removeAllSprites() {
+        while (this.animatedEntities.length) {
+            if (this.animatedEntities[0].sprite) {
                 this.scene.remove(this.animatedEntities[0].sprite)
             }
-            this.animatedEntities.splice(0,1);
+            this.animatedEntities.splice(0, 1);
         }
-        for (let animatedEntity of this.animatedEntities){
-            
+        for (let animatedEntity of this.animatedEntities) {
+
         }
 
     }
@@ -561,17 +568,19 @@ export class View {
 
 
     updateTxt() {
-        if (this.selectedImage === -1) {
-            (<HTMLButtonElement>document.getElementById('selectedSprite')).value = 'nada';
-            (<HTMLButtonElement>document.getElementById('selectedAnimation')).value = 'x';
-            (<HTMLButtonElement>document.getElementById('spritePos')).value = 'nada';
-        }
-        else {
-            const sprite = this.animatedEntities[this.selectedImage].sprite;
-            if (sprite) {
-                (<HTMLButtonElement>document.getElementById('selectedSprite')).value = sprite.name;
-                (<HTMLButtonElement>document.getElementById('selectedAnimation')).value = '' + this.animatedEntities[this.selectedImage].getNumRow();
-                (<HTMLButtonElement>document.getElementById('spritePos')).value = sprite.position.x + ' | ' + sprite.position.y;
+        if (document.getElementById('selectedSprite')) {
+            if (this.selectedImage === -1) {
+                (<HTMLButtonElement>document.getElementById('selectedSprite')).value = 'nada';
+                (<HTMLButtonElement>document.getElementById('selectedAnimation')).value = 'x';
+                (<HTMLButtonElement>document.getElementById('spritePos')).value = 'nada';
+            }
+            else {
+                const sprite = this.animatedEntities[this.selectedImage].sprite;
+                if (sprite) {
+                    (<HTMLButtonElement>document.getElementById('selectedSprite')).value = sprite.name;
+                    (<HTMLButtonElement>document.getElementById('selectedAnimation')).value = '' + this.animatedEntities[this.selectedImage].getNumRow();
+                    (<HTMLButtonElement>document.getElementById('spritePos')).value = sprite.position.x + ' | ' + sprite.position.y;
+                }
             }
         }
 
