@@ -25,7 +25,7 @@ export class GameCoordinator {
             }
         });
         connection.gameSelection.subscribe(response => {
-            console.log('pepino: ', response);
+            console.log('GameCoordinator connection gameselection: ', response);
             switch (response.method) {
                 case 'menu':
                     // menu.getMatches(response.content as Match[]);
@@ -60,8 +60,17 @@ export class GameCoordinator {
             }
         });
 
-        connection.gameEvent.subscribe(event => {
-            console.log('pepino: ' + event);
+        connection.gameEvent.subscribe((event: any) => {
+            switch (event.method) {
+                case 'moveUnit':
+                    console.log('game coordinator move unit troops:', event.content.troops)
+                    for (let troop of event.content.troops) {
+                        view.spriteWalkFromNet(troop.id, troop.position.first, troop.position.second);
+                    }
+                    break;
+                default:
+                    break;
+            }
         });
 
         connection.connected.subscribe(() => {
